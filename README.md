@@ -1,8 +1,6 @@
 # SLEAPyFaces
 
-This is a package for extracting facial expressions from SLEAP analyses.
-
-----
+__A package for extracting facial expressions from SLEAP analyses with sensable assumptions.__
 
 [![PyPI - Version](https://img.shields.io/pypi/v/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
@@ -10,15 +8,25 @@ This is a package for extracting facial expressions from SLEAP analyses.
 **Table of Contents**
 
 - [SLEAPyFaces](#sleapyfaces)
+	- [Description](#description)
 	- [Installation](#installation)
 	- [License](#license)
 	- [To Do:](#to-do)
+
+----
+
+## Description
+
+Sleapyfaces is a data analysis package for extracting facial expressions of mice from SLEAP analyses. It is designed to work with the SLEAP software package, which provides a graphical user interface for annotating animal behavioral videos. SLEAP is available at https://sleap.ai. This package also depends on many assumptions about the data format and structure of the SLEAP analyses. It is not intended to be a general tool for extracting facial expressions from SLEAP analyses, but rather a tool for extracting facial expressions from the specific data format and structure used in the lab of Dr. Kay Tye at The Salk Institute for Biological Studies.
+
+----
 
 ## Installation
 
 ```console
 pip install sleapyfaces
 ```
+----
 
 ## License
 

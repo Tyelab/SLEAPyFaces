@@ -3,7 +3,6 @@ from os import PathLike
 import os
 import glob
 import pandas as pd
-from pyparsing import col
 
 
 @dataclass(slots=True)
