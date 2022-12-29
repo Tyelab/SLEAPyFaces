@@ -1,0 +1,5 @@
+/tests/data/
+/dist
+/.pytest_cache
+/sleapyfaces/__pycache__
+/tests/__pycache__
