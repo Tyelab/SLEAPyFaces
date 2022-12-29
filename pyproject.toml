@@ -8,7 +8,17 @@ description = 'A package for extracting facial expressions from SLEAP analyses'
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
-keywords = []
+keywords = [
+  "SLEAP",
+  "facial expression",
+  "facial data",
+  "extraction",
+  "analysis",
+  "recognition",
+  "classification",
+  "tracking analyses",
+]
+
 authors = [
   { name = "Analetta (Annie) Ehler", email = "annie.ehler.4@gmail.com" },
 ]
@@ -30,10 +40,11 @@ dependencies = [
   "numpy",
   "scipy",
   "scikit-learn",
-  "tables",
   "ffmpeg-python",
   "h5py",
+  "tables",
   "python-rapidjson",
+  "matplotlib",
 ]
 dynamic = ["version"]
 

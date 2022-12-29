@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2022-present Annie Ehler <annie.ehler.4@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+from .__about__ import *
+
 from sleapyfaces.project import Project
 from sleapyfaces.experiment import Experiment
 from sleapyfaces.io import SLEAPanalysis, DAQData, BehMetadata, VideoMetadata
