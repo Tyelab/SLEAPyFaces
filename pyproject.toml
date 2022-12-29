@@ -13,7 +13,7 @@ authors = [
   { name = "Analetta (Annie) Ehler", email = "annie.ehler.4@gmail.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 3 - Alpha",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
@@ -22,10 +22,18 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
-	"License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
   "click",
+  "pandas",
+  "numpy",
+  "scipy",
+  "scikit-learn",
+  "tables",
+  "ffmpeg-python",
+  "h5py",
+  "python-rapidjson",
 ]
 dynamic = ["version"]
 
