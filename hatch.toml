@@ -5,6 +5,7 @@ path = "sleapyfaces/__about__.py"
 exclude = [
   "/.github",
   "/docs",
+	"/tests/data",
 ]
 
 [build.targets.wheel]
