@@ -7,6 +7,23 @@ This is a package for extracting facial expressions from SLEAP analyses.
 [![PyPI - Version](https://img.shields.io/pypi/v/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 
+**Table of Contents**
+
+- [SLEAPyFaces](#sleapyfaces)
+	- [Installation](#installation)
+	- [License](#license)
+	- [To Do:](#to-do)
+
+## Installation
+
+```console
+pip install sleapyfaces
+```
+
+## License
+
+`sleapyfaces` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
 -----
 
 ## To Do:
@@ -64,22 +81,3 @@ Things that it does:
     - [x] apply gaussian kernel to PCA outputs
 10. Save the data
     - [x] write everything to HDF5 file(s)
-
-----
-
-**Table of Contents**
-
-- [SLEAPyFaces](#sleapyfaces)
-	- [To Do:](#to-do)
-	- [Installation](#installation)
-	- [License](#license)
-
-## Installation
-
-```console
-pip install sleapyfaces
-```
-
-## License
-
-`sleapyfaces` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
