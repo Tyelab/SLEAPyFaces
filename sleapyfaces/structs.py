@@ -43,17 +43,17 @@ class FileConstructor:
 
     """Takes in the base paths and filenames of the experimental data and returns them as a structured object.
 
-    Class Attributes:
-        DAQFile (str): The location of the DAQ data file.
-        SLEAPFile (str): The location of the SLEAP analysis file.
-        BehFile (str): The location of the behavioral metadata file.
-        VideoFile (str): The location of the video file.
+    Args:
+        DAQFile (File): The location of the DAQ data file.
+        SLEAPFile (File): The location of the SLEAP analysis file.
+        BehFile (File): The location of the behavioral metadata file.
+        VideoFile (File): The location of the video file.
 
-    Instance Attributes:
-        DAQ (File): The location of the DAQ file as a structured File object.
-        SLEAP (File): The location of the SLEAP analysis file as a structured File object.
-        Beh (File): The location of the behavioral metadata file as a structured File object.
-        Video (File): The location of the video file as a structured File object.
+    Attributes:
+        daq (File): The location of the DAQ file as a structured File object.
+        sleap (File): The location of the SLEAP analysis file as a structured File object.
+        beh (File): The location of the behavioral metadata file as a structured File object.
+        video (File): The location of the video file as a structured File object.
     """
 
     daq: File
@@ -89,5 +89,13 @@ class CustomColumn:
         self.ColumnData = ColumnData
 
     def buildColumn(self, length: int) -> None:
+        """Initializes a column of a given length.
+
+        Args:
+            length (int): The length of the column to be built.
+
+        Initializes Attributes:
+            Column (pd.DataFrame): The initialized column at a given length.
+        """
         self.Column = [self.ColumnData] * length
         self.Column = pd.DataFrame(self.Column, columns=[self.ColumnTitle])

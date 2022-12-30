@@ -73,6 +73,16 @@ class Project:
             self.exprs[i] = Experiment(name, self.files[i])
 
     def buildColumns(self, columns: list, values: list):
+        """Builds the custom columns for the project and builds the data for each experiment
+
+        Args:
+            columns (list[str]): the column titles
+            values (list[any]): the data for each column
+
+        Initializes attributes:
+            custom_columns (list[CustomColumn]): list of custom columns
+            all_data (pd.DataFrame): the data for all experiments concatenated together
+        """
         self.custom_columns = [0] * len(columns)
         for i in range(len(self.custom_columns)):
             self.custom_columns[i] = CustomColumn(columns[i], values[i])
@@ -91,10 +101,27 @@ class Project:
         start_buffer: int = 10000,
         end_buffer: int = 13000,
     ):
+        """Parses the data from each experiment into its individual trials
+
+        Args:
+            TrackedData (list[str]): The title of the columns from the DAQ data to be tracked
+            Reduced (list[bool]): The corresponding boolean for whether the DAQ data is to be reduced (`True`) or not (`False`)
+            start_buffer (int, optional): The time in milliseconds before the trial start to capture. Defaults to 10000.
+            end_buffer (int, optional): The time in milliseconds after the trial start to capture. Defaults to 13000.
+
+        Initializes attributes:
+            exprs[i].trials (pd.DataFrame): the data frame containing the concatenated trial data for each experiment
+            exprs[i].trialData (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
+        """
         for i in range(len(self.exprs)):
             self.exprs[i].buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
 
     def meanCenter(self):
+        """Recursively mean centers the data for each trial for each experiment
+
+        Initializes attributes:
+            all_data (pd.DataFrame): the mean centered data for all trials and experiments concatenated together
+        """
         mean_all = [0] * len(self.exprs)
         for i in range(len(self.exprs)):
             mean_all[i] = [0] * len(self.exprs[i].trialData)
@@ -111,11 +138,23 @@ class Project:
         self.all_data = pd.concat(mean_all, keys=list(self.iterator.keys()))
 
     def zScore(self):
+        """Z scores the mean centered data for each experiment
+
+        Updates attributes:
+            all_data (pd.DataFrame): the z-scored data for all experiments concatenated together
+        """
         self.all_data = z_score(self.all_data, self.exprs[0].sleap.track_names)
 
     def analyze(self):
+        """Runs the mean centering and z scoring functions
+        """
         self.meanCenter()
         self.zScore()
 
     def visualize(self):
+        """Reduces `all_data` to 2 and 3 dimensions using PCA
+
+        Initializes attributes:
+            pcas (dict[str, pd.DataFrame]): a dictionary containing the 2 and 3 dimensional PCA data for each experiment (the keys are 'pca2d', 'pca3d')
+        """
         self.pcas = pca(self.all_data, self.exprs[0].sleap.track_names)

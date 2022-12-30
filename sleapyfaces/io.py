@@ -22,7 +22,7 @@ class DAQData:
         Cache for DAQ data.
 
     Attrs:
-        path (Text of PathLike[Text]): Path to the directory containing the DAQ data.
+        path (Text or PathLike[Text]): Path to the directory containing the DAQ data.
         cache (pd.DataFrame): Pandas DataFrame containing the DAQ data.
         columns (List): List of column names in the cache.
 
@@ -89,7 +89,6 @@ class SLEAPanalysis:
         track_names (List): list of the track names from the SLEAP analysis file
         tracks (pd.DataFrame): a pandas DataFrame containing the tracks from the SLEAP analysis file
                 (with missing frames filled in using a linear interpolation method)
-                NOTE: more information about the tracks DataFrame can be found in the tracks property docstring
 
     Methods:
         getDatasets: gets the datasets from the SLEAP analysis file
@@ -197,7 +196,7 @@ class BehMetadata:
         Cache for JSON data.
 
     Args:
-        path (str of PathLike[str]): Path to the directory containing the JSON data.
+        path (str of PathLike[str]): Path to the file containing the JSON data.
         MetaDataKey (str, optional): Key for the metadata in the JSON data. Defaults to "beh_metadata" based on bruker_control.
         TrialArrayKey (str, optional): Key for the trial array in the JSON data. Defaults to "trialArray" based on bruker_control.
         ITIArrayKey (str, optional): Key for the ITI array in the JSON data. Defaults to "ITIArray" based on bruker_control.

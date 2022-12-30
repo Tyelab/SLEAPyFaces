@@ -7,6 +7,7 @@ def mean_center(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
 
     Args:
         data (pd.DataFrame): The data to be mean centered.
+        track_names (list[str]): The names of the tracks to mean center.
 
     Returns:
         pd.DataFrame: The mean centered data."""
@@ -21,6 +22,7 @@ def z_score(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
 
     Args:
         data (pd.DataFrame): The data to be z-scored.
+        track_names (list[str]): The names of the tracks to be z-scored.
 
     Returns:
         pd.DataFrame: The z-scored data."""
@@ -31,6 +33,14 @@ def z_score(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
 
 
 def pca(data: pd.DataFrame, track_names: list[str]) -> dict[str, pd.DataFrame]:
+    """Runs 2D and 3D PCA dimensionality reduction on the data.
+
+    Args:
+        data (pd.DataFrame): The data to be reduced.
+        track_names (list[str]): The names of the tracks to be reduced.
+
+    Returns:
+        dict[str, pd.DataFrame]: The reduced data with keys "pca2d" and "pca3d"."""
     num_data = data.loc[:, track_names]
     qual_data = data.drop(columns=track_names)
     pcas = {}

@@ -79,7 +79,14 @@ class Experiment:
         Args:
             item (pd.Series | pd.DataFrame): A pandas series or dataframe to be appended to the SLEAP data.
         """
-        self.sleap.append(item)
+        if isinstance(item, pd.Series) or isinstance(item, pd.DataFrame):
+            self.sleap.append(item)
+            if isinstance(item, pd.Series):
+                self.custom_columns.append(item.name)
+            elif isinstance(item, pd.DataFrame):
+                self.custom_columns.append(item.index)
+        else:
+            raise TypeError("The item to be appended must be a pandas series or dataframe.")
 
     def buildTrials(
         self,
