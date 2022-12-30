@@ -9,6 +9,21 @@ import numpy as np
 
 
 class Experiment:
+    """Class constructor for the Experiment object.
+
+    Args:
+        name (str): The name of the experiment.
+        files (FileConstructor): The FileConstructor object containing the paths to the experiment files.
+
+    Attributes:
+        name (str): The name of the experiment.
+        files (FileConstructor): The FileConstructor object containing the paths to the experiment files.
+        sleap (SLEAPanalysis): The SLEAPanalysis object containing the SLEAP data.
+        beh (BehMetadata): The BehMetadata object containing the behavior metadata.
+        video (VideoMetadata): The VideoMetadata object containing the video metadata.
+        daq (DAQData): The DAQData object containing the DAQ data.
+        numeric_columns (list[str]): A list of the titles of the numeric columns in the SLEAP data.
+    """
     def __init__(self, name: str, files: FileConstructor):
         self.name = name
         self.files = files
@@ -19,6 +34,21 @@ class Experiment:
         self.numeric_columns = self.sleap.track_names
 
     def buildData(self, CustomColumns: list[CustomColumn]):
+        """Builds the data for the experiment.
+
+        Args:
+            CustomColumns (list[CustomColumn]): A list of the CustomColumn objects to be added to the experiment.
+
+        Raises:
+            ValueError: If the columns cannot be appended to the SLEAP data.
+
+        Returns:
+            None
+
+        Initializes attributes:
+            sleap.tracks (pd.DataFrame): The SLEAP data.
+            custom_columns (pd.DataFrame): The non-numeric columns.
+        """
         self.custom_columns = [0] * (len(self.sleap.tracks.index) + len(CustomColumns))
         col_names = [0] * (len(CustomColumns) + 2)
         for i, col in enumerate(CustomColumns):
@@ -44,6 +74,11 @@ class Experiment:
         self.sleap.append(self.custom_columns.loc[:, col_names])
 
     def append(self, item: pd.Series | pd.DataFrame):
+        """Appends a column to the SLEAP data.
+
+        Args:
+            item (pd.Series | pd.DataFrame): A pandas series or dataframe to be appended to the SLEAP data.
+        """
         self.sleap.append(item)
 
     def buildTrials(
@@ -57,8 +92,7 @@ class Experiment:
 
         Args:
             TrackedData (list[str]): the list of columns from the DAQ data that signify the START of each trial.
-            DAQ (DAQData): the DAQ data object.
-            Reduced (list[bool]): a boolean list with the same length as the TrackedData list that signifies the columns from the tracked data with quick TTL pulses that occour during the trial.
+            Reduced (list[bool]): a boolean list with the same length as the TrackedData list that signifies the columns from the tracked data with quick TTL pulses that occur during the trial.
                 (e.g. the LED TTL pulse may signify the beginning of a trial, but during the trial the LED turns on and off, so the LED TTL column should be marked as True)
             start_buffer (int, optional): The time in miliseconds you want to capture before the trial starts. Defaults to 10000 (i.e. 10 seconds).
             end_buffer (int, optional): The time in miliseconds you want to capture after the trial starts. Defaults to 13000 (i.e. 13 seconds).
@@ -66,8 +100,9 @@ class Experiment:
         Raises:
             ValueError: if the length of the TrackedData and Reduced lists are not equal.
 
-        Exposes the instance attribute:
+        Initializes attributes:
                 trials (pd.DataFrame): the dataframe with the data in trial by 	trial format, with a metaindex of trial number and frame number
+                trialData (list[pd.DataFrame]): a list of the dataframes with the individual trial data.
         """
 
         if len(Reduced) != len(TrackedData):

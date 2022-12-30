@@ -81,15 +81,22 @@ class SLEAPanalysis:
     Summary:
         a class for reading and storing SLEAP analysis files
 
-    Class Attributes:
+    Args:
         path (Text | PathLike[Text]): path to the directory containing the SLEAP analysis file
 
-    Instance Attributes:
+    Attributes:
         data (Dict): dictionary of all the data from the SLEAP analysis file
         track_names (List): list of the track names from the SLEAP analysis file
         tracks (pd.DataFrame): a pandas DataFrame containing the tracks from the SLEAP analysis file
                 (with missing frames filled in using a linear interpolation method)
                 NOTE: more information about the tracks DataFrame can be found in the tracks property docstring
+
+    Methods:
+        getDatasets: gets the datasets from the SLEAP analysis file
+        getTracks: gets the tracks from the SLEAP analysis file
+        getTrackNames: gets the track names from the SLEAP analysis file
+        append: appends a column to the tracks DataFrame
+        saveData: saves the data to a json file
     """
 
     path: str | PathLike[str]
@@ -99,7 +106,6 @@ class SLEAPanalysis:
 
     def __init__(self, path: str | PathLike[str]):
         self.path = path
-        """initializes the data"""
         self.getDatasets()
         self.getTracks()
         self.getTrackNames()
@@ -107,7 +113,11 @@ class SLEAPanalysis:
     def getDatasets(
         self,
     ) -> None:
-        """gets the datasets from the SLEAP analysis file"""
+        """gets the datasets from the SLEAP analysis file
+
+        Initializes Attributes:
+            data (Dict): dictionary of all the data from the SLEAP analysis file
+        """
         self.data = {}
         with h5.File(f"{self.path}", "r") as f:
             datasets = list(f.keys())
@@ -122,7 +132,12 @@ class SLEAPanalysis:
                     self.data[dataset] = f[dataset][:].T
 
     def getTracks(self) -> None:
-        """gets the tracks from the SLEAP analysis file"""
+        """gets the tracks from the SLEAP analysis file
+
+        Initializes Attributes:
+            tracks (pd.DataFrame): a pandas DataFrame containing the tracks from the SLEAP analysis file
+            (with missing frames filled in using a linear interpolation method)
+        """
         if len(self.data.values()) == 0:
             raise ValueError("No data has been loaded.")
         else:
@@ -131,7 +146,11 @@ class SLEAPanalysis:
             )
 
     def getTrackNames(self) -> None:
-        """gets the track names from the SLEAP analysis file"""
+        """gets the track names from the SLEAP analysis file
+
+        Initializes Attributes:
+            track_names (List): list of the track names from the SLEAP analysis file
+        """
         self.track_names = [0] * (len(self.data["node_names"]) * 2)
         for name, i in zip(
             self.data["node_names"], range(0, (len(self.data["node_names"]) * 2), 2)
@@ -140,6 +159,18 @@ class SLEAPanalysis:
             self.track_names[i + 1] = f"{name.replace(' ', '_')}_y"
 
     def append(self, item: pd.Series | pd.DataFrame) -> None:
+        """Appends a column to the tracks DataFrame
+
+        Args:
+            item (pd.Series | pd.DataFrame): The column to append to the tracks DataFrame
+
+        Raises:
+            ValueError: if the length of the column does not match the length of the tracks data columns
+            (i.e. if the column is not the same length as the number of frames)
+
+        Updates Attributes:
+            tracks (pd.DataFrame): a pandas DataFrame containing the tracks from the SLEAP analysis file
+        """
         if len(item.index) == len(self.tracks.index):
             self.tracks = pd.concat([self.tracks, item], axis=1)
         else:
@@ -165,19 +196,22 @@ class BehMetadata:
     Summary:
         Cache for JSON data.
 
-    Class Attributes:
+    Args:
         path (str of PathLike[str]): Path to the directory containing the JSON data.
-        MetaDataKey (str): Key for the metadata in the JSON data. Defaults to "beh_metadata" based on bruker_control.
-        TrialArrayKey (str): Key for the trial array in the JSON data. Defaults to "trialArray" based on bruker_control.
-        ITIArrayKey (str): Key for the ITI array in the JSON data. Defaults to "ITIArray" based on bruker_control.
+        MetaDataKey (str, optional): Key for the metadata in the JSON data. Defaults to "beh_metadata" based on bruker_control.
+        TrialArrayKey (str, optional): Key for the trial array in the JSON data. Defaults to "trialArray" based on bruker_control.
+        ITIArrayKey (str, optional): Key for the ITI array in the JSON data. Defaults to "ITIArray" based on bruker_control.
 
         Bruker Control Repository:
             Link: https://github.com/Tyelab/bruker_control
             Author: Jeremy Delahanty
 
-    Instance Attributes:
+    Attributes:
         cache (pd.DataFrame): Pandas DataFrame containing the JSON data.
-        columns (List): List of column names in the cache."""
+        columns (List): List of column names in the cache.
+
+    Methods:
+        saveData: saves the data to a json file"""
 
     path: str | PathLike[str]
     MetaDataKey: str
@@ -209,6 +243,11 @@ class BehMetadata:
         self.columns = self.cache.columns.to_list()
 
     def saveData(self, filename: str | PathLike[str] | FileIO) -> None:
+        """Saves the DAQ data to a csv file.
+
+        Args:
+            filename (str | PathLike[str] | FileIO): The name and path of the file to save the data to.
+        """
         if (
             filename.endswith(".csv")
             or filename.endswith(".CSV")
@@ -225,11 +264,15 @@ class VideoMetadata:
     Summary:
         class for caching the video metadata.
 
-    Class Attributes:
+    Args:
         path (str of PathLike[str]): Path to the directory containing the video data.
 
-    Instance Attributes:
+    Attributes:
+        cache (dict): Dictionary containing the video metadata from ffmpeg.
         fps (float): Frames per second of the video data.
+
+    Methods:
+        saveData: saves the data to a json file
     """
 
     path: str | PathLike[str]
@@ -244,6 +287,11 @@ class VideoMetadata:
         self.fps = float(eval(self.cache.get("avg_frame_rate")))
 
     def saveData(self, filename: str | PathLike[str] | FileIO) -> None:
+        """Saves the video metadata to a json file.
+
+        Args:
+            filename (str | PathLike[str] | FileIO): the name and path of the file to save the data to.
+        """
         if (
             filename.endswith(".json")
             or filename.endswith(".JSON")

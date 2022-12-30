@@ -1,17 +1,21 @@
 # SLEAPyFaces
 
-__A package for extracting facial expressions from SLEAP analyses with sensable assumptions.__
+*A package for extracting facial expressions from SLEAP analyses with sensible assumptions.*
 
 [![PyPI - Version](https://img.shields.io/pypi/v/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
+[![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
-**Table of Contents**
+----
+
+## Table of Contents
 
 - [SLEAPyFaces](#sleapyfaces)
-	- [Description](#description)
-	- [Installation](#installation)
-	- [License](#license)
-	- [To Do:](#to-do)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Installation](#installation)
+  - [License](#license)
+  - [To Do:](#to-do)
 
 ----
 
@@ -35,8 +39,6 @@ pip install sleapyfaces
 -----
 
 ## To Do:
-
-Things that it does:
 1. iterate (repeatedly) over each mouse and each week (each mouse and each experiment)
     - [x] get project files (experimental) structure
     - [x] initialize an iterator over project structure
@@ -77,7 +79,7 @@ Things that it does:
     - [x] for each feature, grab the start and end indices
     - [x] store data from each trial in a pd.dataframe
     - [x] concatenate all pd.dataframes together for each video
-    - [ ] concatenate the pd.dataframes from each video together for each mouse (base expr split)
+    - [x] concatenate the pd.dataframes from each video together for each mouse (base expr split)
 8. Prepare the data
     - [x] (opt.) mean center across all points for a single trial
     - [x] mean center across all trials for a single experiment
@@ -89,3 +91,15 @@ Things that it does:
     - [x] apply gaussian kernel to PCA outputs
 10. Save the data
     - [x] write everything to HDF5 file(s)
+11. V2
+    - [ ] add support for multiple mice
+    - [ ] add clustering/prediction algorithm(s)
+    - [ ] add velocity, acceleration, and jerk calculations
+    - [ ] add save option for all data
+    - [ ] add plotting functions
+    - [ ] clustering features
+        - [ ] distance to a point
+            - [ ] vector to a point (theta, magnitude) or (angle, distance)
+        - [ ] velocity/acceleration
+        - [ ] distance to centroid
+        - [ ] distance between given points

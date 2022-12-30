@@ -3,7 +3,13 @@ from sklearn.decomposition import PCA
 
 
 def mean_center(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
-    """Mean center the data."""
+    """Mean center the data.
+
+    Args:
+        data (pd.DataFrame): The data to be mean centered.
+
+    Returns:
+        pd.DataFrame: The mean centered data."""
     num_data = data.loc[:, track_names]
     num_data = num_data - num_data.mean()
     data.loc[:, track_names] = num_data
@@ -11,7 +17,13 @@ def mean_center(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
 
 
 def z_score(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
-    """Mean center the data."""
+    """z-score the data.
+
+    Args:
+        data (pd.DataFrame): The data to be z-scored.
+
+    Returns:
+        pd.DataFrame: The z-scored data."""
     data = mean_center(data, track_names)
     for track in track_names:
         data.loc[:, track] = data.loc[:, track] / data.loc[:, track].std()
