@@ -1007,6 +1007,12 @@ column.buildColumn(
   - [x] add exhaustive documentation
   - [x] add inline documentation
   - [x] strengthen type hints
+  - [x] Fix bug where the `CustomColumn` class is not properly initialized
+  - [x] Fix bug where the `CustomColumn` class is not properly built
+  - [x] Fix bug where the `CustomColumn` class is not properly appended
+  - [x] Fix bug where the `trials` and `trialData` attributes were not properly initialized
+  - [x] Fix bug where the `trials` and `trialData` attributes were not properly built
+  - [x] Fix bug where the `meanCenter` did not properly mean center the data recursively
 ### Version 1.1.0 (in progress)
   - [ ] add support for multiple mice
   - [ ] add clustering/prediction algorithm(s)
