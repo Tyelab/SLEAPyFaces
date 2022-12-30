@@ -69,6 +69,7 @@ Based on [these](https://github.com/annie444/Facial-Expression-Analyses) scripts
 			- [`sleapyfaces.structs.CustomColumn.buildColumn`](#sleapyfacesstructscustomcolumnbuildcolumn)
 	- [Changelog:](#changelog)
 		- [Version 1.0.0 (2022-12-27)](#version-100-2022-12-27)
+		- [Version 1.0.1](#version-101)
 		- [Version 1.1.0 (in progress)](#version-110-in-progress)
 
 ----
@@ -81,7 +82,7 @@ Sleapyfaces is a data analysis package for extracting facial expressions of mice
 
 If you use SLEAPyFaces in your research, this does not fall under *standard software* according to the *Publication Manual* for the APA, MLA, AMA, Turabian, IEEE, Vancouver style, Harvard style, or Chicago style guides. **Please cite the following:**
 
-> A. Ehler,  J. Delahantey, A. Coley, D. LeDuke, L. Keyes, T.D. Pereira, and K. Tye. SLEAPyFaces: A package for extracting facial expressions from SLEAP analyses with sensible assumptions. SLEAPyFaces python package, v1.0.0, 2023. Retrieved from [https://github.com/annie444/sleapyfaces/](https://github.com/annie444/sleapyfaces/)
+> A. Ehler,  J. Delahantey, A. Coley, D. LeDuke, L. Keyes, T.D. Pereira, and K. Tye. SLEAPyFaces: A package for extracting facial expressions from SLEAP analyses with sensible assumptions. SLEAPyFaces python package, v1.0.1, 2023. Retrieved from [https://github.com/annie444/sleapyfaces/](https://github.com/annie444/sleapyfaces/)
 
 **BibTeX:**
 ```bibtex
@@ -98,7 +99,7 @@ If you use SLEAPyFaces in your research, this does not fall under *standard soft
     url={https://github.com/annie444/sleapyfaces/},
     journal={SLEAPyFaces python package},
     publisher={GitHub repository},
-    volume={v1.0.0},
+    volume={v1.0.1},
     year={2023},
     month={Dec},
     day={27}
@@ -1002,7 +1003,10 @@ column.buildColumn(
     - [x] apply gaussian kernel to PCA outputs
 10. Save the data
     - [x] write everything to HDF5 file(s)
-
+### Version 1.0.1
+  - [x] add exhaustive documentation
+  - [x] add inline documentation
+  - [x] strengthen type hints
 ### Version 1.1.0 (in progress)
   - [ ] add support for multiple mice
   - [ ] add clustering/prediction algorithm(s)
