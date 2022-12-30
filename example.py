@@ -23,7 +23,5 @@ proj.analyze()
 proj.visualize()
 
 data = proj.pcas["pca3d"]
-
 fig = px.scatter_3d(data, x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
-
 fig.show()
