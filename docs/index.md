@@ -10,14 +10,18 @@ Based on [these](https://github.com/annie444/Facial-Expression-Analyses) scripts
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
+## Description
+
+Sleapyfaces is a data analysis package for extracting facial expressions of mice from SLEAP analyses. It is designed to work with the SLEAP software package, which provides a graphical user interface for annotating animal behavioral videos. More information on SLEAP is available at [https://sleap.ai](https://sleap.ai). This package also depends on many assumptions about the data format and structure of the SLEAP analyses. It is not intended to be a general tool for extracting facial expressions from SLEAP analyses, but rather a tool for extracting facial expressions from the specific data format and structure used in the lab of Dr. Kay Tye at The Salk Institute for Biological Studies.
+
 ----
 
 ## Table of Contents
 
 - [SLEAPyFaces](#sleapyfaces)
+	- [Description](#description)
 	- [Table of Contents](#table-of-contents)
 	- [Pages](#pages)
-	- [Description](#description)
 		- [Citing:](#citing)
 		- [License](#license)
 
@@ -28,10 +32,6 @@ Based on [these](https://github.com/annie444/Facial-Expression-Analyses) scripts
 - [Change Log](changelog.md)
 
 ----
-
-## Description
-
-Sleapyfaces is a data analysis package for extracting facial expressions of mice from SLEAP analyses. It is designed to work with the SLEAP software package, which provides a graphical user interface for annotating animal behavioral videos. More information on SLEAP is available at [https://sleap.ai](https://sleap.ai). This package also depends on many assumptions about the data format and structure of the SLEAP analyses. It is not intended to be a general tool for extracting facial expressions from SLEAP analyses, but rather a tool for extracting facial expressions from the specific data format and structure used in the lab of Dr. Kay Tye at The Salk Institute for Biological Studies.
 
 ### Citing:
 
