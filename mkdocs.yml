@@ -1,6 +1,8 @@
-site_name: SLEAPyFaces
-site_url: https://annieehler.com/sleapyfaces
+site_name: SLEAPyFaces Documentation
 nav:
-    - Home: index.md
-    - About: about.md
+  - Home: index.md
+  - Getting Started: gettingstarted.md
+  - Project Structure: projectstructure.md
+  - API Reference: api.md
+  - Change Log: changelog.md
 theme: readthedocs

@@ -7,6 +7,10 @@ Based on [these](https://github.com/annie444/Facial-Expression-Analyses) scripts
 [![PyPI - Version](https://img.shields.io/pypi/v/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
+[![Build Status](https://travis-ci.org/annie444/sleapyfaces.svg?branch=master)](https://travis-ci.org/annie444/sleapyfaces)
+[![codecov](https://codecov.io/gh/annie444/sleapyfaces/branch/master/graph/badge.svg)](https://codecov.io/gh/annie444/sleapyfaces)
+[![Documentation](https://www.mkdocs.org/img/favicon.ico)](https://annie444.github.io/SLEAPyFaces/)
+[![MIT License](https://img.shields.io/pypi/l/sleapyfaces.svg)](https://github.com/annie444/sleapyfaces/blob/master/LICENSE)
 
 ## Description
 

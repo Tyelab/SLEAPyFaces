@@ -3,3 +3,5 @@
 /.pytest_cache
 /sleapyfaces/__pycache__
 /tests/__pycache__
+/.vscode
+/.ipynb_checkpoints
