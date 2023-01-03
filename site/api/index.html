@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>API Reference - SLEAPyFaces Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "API Reference";
+        var mkdocs_page_input_path = "api.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> SLEAPyFaces Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../gettingstarted/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../projectstructure/">Project Structure</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">API Reference</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesprojectproject">sleapyfaces.project.Project</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesprojectprojectbuildcolumns">sleapyfaces.project.Project.buildColumns</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesprojectprojectbuildtrials">sleapyfaces.project.Project.buildTrials</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesprojectprojectmeancenter">sleapyfaces.project.Project.meanCenter</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesprojectprojectzscore">sleapyfaces.project.Project.zScore</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesprojectprojectanalyze">sleapyfaces.project.Project.analyze</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesprojectprojectvisualize">sleapyfaces.project.Project.visualize</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesexperimentexperiment">sleapyfaces.experiment.Experiment</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesexperimentexperimentbuilddata">sleapyfaces.experiment.Experiment.buildData</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesexperimentexperimentappend">sleapyfaces.experiment.Experiment.append</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesexperimentexperimentbuildtrials">sleapyfaces.experiment.Experiment.buildTrials</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesiodaqdata">sleapyfaces.io.DAQData</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiodaqdataappend">sleapyfaces.io.DAQData.append</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiodaqdatasavedata">sleapyfaces.io.DAQData.saveData</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesiosleapanalysis">sleapyfaces.io.SLEAPanalysis</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiosleapanalysisgetdatasets">sleapyfaces.io.SLEAPanalysis.getDatasets</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiosleapanalysisgettracks">sleapyfaces.io.SLEAPanalysis.getTracks</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiosleapanalysisgettracknames">sleapyfaces.io.SLEAPanalysis.getTrackNames</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiosleapanalysisappend">sleapyfaces.io.SLEAPanalysis.append</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiosleapanalysissavedata">sleapyfaces.io.SLEAPanalysis.saveData</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesiobehmetadata">sleapyfaces.io.BehMetadata</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiobehmetadatasavedata">sleapyfaces.io.BehMetadata.saveData</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesiovideometadata">sleapyfaces.io.VideoMetadata</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesiovideometadatasavedata">sleapyfaces.io.VideoMetadata.saveData</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesnormalizemean_center">sleapyfaces.normalize.mean_center</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesnormalizez_score">sleapyfaces.normalize.z_score</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesnormalizepca">sleapyfaces.normalize.pca</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesstructsfile">sleapyfaces.structs.File</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesstructsfileconstructor">sleapyfaces.structs.FileConstructor</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sleapyfacesstructscustomcolumn">sleapyfaces.structs.CustomColumn</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sleapyfacesstructscustomcolumnbuildcolumn">sleapyfaces.structs.CustomColumn.buildColumn</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../changelog/">Change Log</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">SLEAPyFaces Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>API Reference</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="api-reference">API Reference</h1>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#api-reference">API Reference</a><ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#sleapyfacesprojectproject"><code>sleapyfaces.project.Project</code></a><ul>
+<li><a href="#sleapyfacesprojectprojectbuildcolumns"><code>sleapyfaces.project.Project.buildColumns</code></a></li>
+<li><a href="#sleapyfacesprojectprojectbuildtrials"><code>sleapyfaces.project.Project.buildTrials</code></a></li>
+<li><a href="#sleapyfacesprojectprojectmeancenter"><code>sleapyfaces.project.Project.meanCenter</code></a></li>
+<li><a href="#sleapyfacesprojectprojectzscore"><code>sleapyfaces.project.Project.zScore</code></a></li>
+<li><a href="#sleapyfacesprojectprojectanalyze"><code>sleapyfaces.project.Project.analyze</code></a></li>
+<li><a href="#sleapyfacesprojectprojectvisualize"><code>sleapyfaces.project.Project.visualize</code></a></li>
+</ul>
+</li>
+<li><a href="#sleapyfacesexperimentexperiment"><code>sleapyfaces.experiment.Experiment</code></a><ul>
+<li><a href="#sleapyfacesexperimentexperimentbuilddata"><code>sleapyfaces.experiment.Experiment.buildData</code></a></li>
+<li><a href="#sleapyfacesexperimentexperimentappend"><code>sleapyfaces.experiment.Experiment.append</code></a></li>
+<li><a href="#sleapyfacesexperimentexperimentbuildtrials"><code>sleapyfaces.experiment.Experiment.buildTrials</code></a></li>
+</ul>
+</li>
+<li><a href="#sleapyfacesiodaqdata"><code>sleapyfaces.io.DAQData</code></a><ul>
+<li><a href="#sleapyfacesiodaqdataappend"><code>sleapyfaces.io.DAQData.append</code></a></li>
+<li><a href="#sleapyfacesiodaqdatasavedata"><code>sleapyfaces.io.DAQData.saveData</code></a></li>
+</ul>
+</li>
+<li><a href="#sleapyfacesiosleapanalysis"><code>sleapyfaces.io.SLEAPanalysis</code></a><ul>
+<li><a href="#sleapyfacesiosleapanalysisgetdatasets"><code>sleapyfaces.io.SLEAPanalysis.getDatasets</code></a></li>
+<li><a href="#sleapyfacesiosleapanalysisgettracks"><code>sleapyfaces.io.SLEAPanalysis.getTracks</code></a></li>
+<li><a href="#sleapyfacesiosleapanalysisgettracknames"><code>sleapyfaces.io.SLEAPanalysis.getTrackNames</code></a></li>
+<li><a href="#sleapyfacesiosleapanalysisappend"><code>sleapyfaces.io.SLEAPanalysis.append</code></a></li>
+<li><a href="#sleapyfacesiosleapanalysissavedata"><code>sleapyfaces.io.SLEAPanalysis.saveData</code></a></li>
+</ul>
+</li>
+<li><a href="#sleapyfacesiobehmetadata"><code>sleapyfaces.io.BehMetadata</code></a><ul>
+<li><a href="#sleapyfacesiobehmetadatasavedata"><code>sleapyfaces.io.BehMetadata.saveData</code></a></li>
+</ul>
+</li>
+<li><a href="#sleapyfacesiovideometadata"><code>sleapyfaces.io.VideoMetadata</code></a><ul>
+<li><a href="#sleapyfacesiovideometadatasavedata"><code>sleapyfaces.io.VideoMetadata.saveData</code></a></li>
+</ul>
+</li>
+<li><a href="#sleapyfacesnormalizemean_center"><code>sleapyfaces.normalize.mean_center</code></a></li>
+<li><a href="#sleapyfacesnormalizez_score"><code>sleapyfaces.normalize.z_score</code></a></li>
+<li><a href="#sleapyfacesnormalizepca"><code>sleapyfaces.normalize.pca</code></a></li>
+<li><a href="#sleapyfacesstructsfile"><code>sleapyfaces.structs.File</code></a></li>
+<li><a href="#sleapyfacesstructsfileconstructor"><code>sleapyfaces.structs.FileConstructor</code></a></li>
+<li><a href="#sleapyfacesstructscustomcolumn"><code>sleapyfaces.structs.CustomColumn</code></a><ul>
+<li><a href="#sleapyfacesstructscustomcolumnbuildcolumn"><code>sleapyfaces.structs.CustomColumn.buildColumn</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="sleapyfacesprojectproject"><code>sleapyfaces.project.Project</code></h2>
+<pre><code class="language-python">proj = sleapyfaces.project.Project(
+    DAQFile: str,
+    BehFile: str,
+    SLEAPFile: str,
+    VideoFile: str,
+    base: str,
+    iterator: dict[str, str] | None, # Optional
+    get_glob: bool = False, # Optional
+    )
+</code></pre>
+<ul>
+<li><code>Project</code> is the main class for the <code>sleapyfaces</code> package. It is used to initialize the project and iterate over the project structure.</li>
+<li>Args:<ul>
+<li><code>DAQFile</code> (string): The naming convention for the DAQ files (e.g. "*_events.csv" or "DAQOutput.csv")</li>
+<li><code>ExprMetaFile</code> (string): The naming convention for the experimental structure files (e.g. "*_config.json" or "BehMetadata.json")</li>
+<li><code>SLEAPFile</code> (string): The naming convention for the SLEAP files (e.g. "*_sleap.h5" or "SLEAP.h5")</li>
+<li><code>VideoFile</code> (string): The naming convention for the video files (e.g. "*.mp4" or "video.avi")</li>
+<li><code>base</code> (string): Base path of the project (e.g. "/specialk_cs/2p/raw/CSE009")</li>
+<li><code>iterator</code> (dictionary[string, string], optional): Iterator for the project files, with keys as the label and values as the folder name (e.g. {"week 1": "20211105", "week 2": "20211112"})</li>
+<li><code>get_glob</code> (boolean, default = <code>False</code>): Whether to use glob to find the files (e.g. True or False). Default is False.</li>
+<li>NOTE: if glob is True, make sure to at least include the file extension with an asterisk in the naming convention</li>
+<li>e.g. <code>DAQFile="*.csv"</code> or <code>SLEAPFile="*.h5"</code></li>
+</ul>
+</li>
+<li>Attributes:<ul>
+<li><code>exprs</code> (list[<code>Experiment</code>]): List of the experiment objects</li>
+<li><code>files</code> (list[<code>FileConstructor</code>]): <code>FileConstructor</code> object</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesprojectprojectbuildcolumns"><code>sleapyfaces.project.Project.buildColumns</code></h3>
+<pre><code class="language-python">proj.buildColumns(
+    columns: list[str],
+    values: list[str],
+    )
+</code></pre>
+<ul>
+<li>Builds the custom columns for the project and builds the data for each experiment</li>
+<li>Args:<ul>
+<li><code>columns</code> (list[string]): the column titles</li>
+<li><code>values</code> (list[any]): the data for each column</li>
+</ul>
+</li>
+<li>Initializes attributes:<ul>
+<li><code>custom_columns</code> (list[<code>CustomColumn</code>]): list of custom columns</li>
+<li><code>all_data</code> (<code>pd.DataFrame</code>): the data for all experiments concatenated together</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesprojectprojectbuildtrials"><code>sleapyfaces.project.Project.buildTrials</code></h3>
+<pre><code class="language-python">proj.buildTrials(
+    TrackedData: list[str],
+    Reduced: list[bool],
+    start_buffer: int = 10000, # Optional
+    end_buffer: int = 13000, # Optional
+    )
+</code></pre>
+<ul>
+<li>Parses the data from each experiment into its individual trials</li>
+<li>Args:<ul>
+<li><code>TrackedData</code> (list[string]): The title of the columns from the DAQ data to be tracked</li>
+<li><code>Reduced</code> (list[boolean]): The corresponding boolean for whether the DAQ data is to be reduced (<code>True</code>) or not (<code>False</code>)</li>
+<li><code>start_buffer</code> (integer, optional): The time in milliseconds before the trial start to capture. Defaults to 10000.</li>
+<li><code>end_buffer</code> (integer, optional): The time in milliseconds after the trial start to capture. Defaults to 13000.</li>
+</ul>
+</li>
+<li>Initializes attributes:<ul>
+<li><code>exprs[i].trials</code> (<code>pd.DataFrame</code>): the data frame containing the concatenated trial data for each experiment</li>
+<li><code>exprs[i].trialData</code> (list[<code>pd.DataFrame</code>]): the list of data frames containing the trial data for each trial for each experiment</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesprojectprojectmeancenter"><code>sleapyfaces.project.Project.meanCenter</code></h3>
+<pre><code class="language-python">proj.meanCenter()
+</code></pre>
+<ul>
+<li>Recursively mean centers the data for each trial for each experiment</li>
+<li>Initializes attributes:<ul>
+<li><code>all_data</code> (<code>pd.DataFrame</code>): the mean centered data for all trials and experiments concatenated together</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesprojectprojectzscore"><code>sleapyfaces.project.Project.zScore</code></h3>
+<pre><code class="language-python">proj.zScore()
+</code></pre>
+<ul>
+<li>Z scores the mean centered data for each experiment</li>
+<li>Updates attributes:<ul>
+<li><code>all_data</code> (<code>pd.DataFrame</code>): the z-scored data for all experiments concatenated together</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesprojectprojectanalyze"><code>sleapyfaces.project.Project.analyze</code></h3>
+<pre><code class="language-python">proj.analyze()
+</code></pre>
+<ul>
+<li>Runs the mean centering and z scoring functions</li>
+</ul>
+<h3 id="sleapyfacesprojectprojectvisualize"><code>sleapyfaces.project.Project.visualize</code></h3>
+<pre><code class="language-python">proj.visualize()
+</code></pre>
+<ul>
+<li>Reduces <code>all_data</code> to 2 and 3 dimensions using PCA</li>
+<li>Initializes attributes:<ul>
+<li><code>pcas</code> (dictionary[string, <code>pd.DataFrame</code>]): a dictionary containing the 2 and 3 dimensional PCA data for each experiment</li>
+<li>the dictionary keys are <code>'pca2d'</code>, <code>'pca3d'</code></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesexperimentexperiment"><code>sleapyfaces.experiment.Experiment</code></h2>
+<pre><code class="language-python">expr = sleapyfaces.experiment.Experiment(
+    name: str,
+    files: sleapyfaces.structs.FileConstructor,
+    )
+</code></pre>
+<ul>
+<li>Class constructor for the Experiment object.</li>
+<li>Args:<ul>
+<li><code>name</code> (string): The name of the experiment.</li>
+<li><code>files</code> (<code>FileConstructor</code>): The <code>FileConstructor</code> object containing the paths to the experiment files.</li>
+</ul>
+</li>
+<li>Attributes:<ul>
+<li><code>name</code> (string): The name of the experiment.</li>
+<li><code>files</code> (<code>FileConstructor</code>): The <code>FileConstructor</code> object containing the paths to the experiment files.</li>
+<li><code>sleap</code> (<code>SLEAPanalysis</code>): The <code>SLEAPanalysis</code> object containing the SLEAP data.</li>
+<li><code>beh</code> (<code>BehMetadata</code>): The <code>BehMetadata</code> object containing the behavior metadata.</li>
+<li><code>video</code> (<code>VideoMetadata</code>): The <code>VideoMetadata</code> object containing the video metadata.</li>
+<li><code>daq</code> (<code>DAQData</code>): The <code>DAQData</code> object containing the DAQ data.</li>
+<li><code>numeric_columns</code> (list[string]): A list of the titles of the numeric columns in the SLEAP data.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesexperimentexperimentbuilddata"><code>sleapyfaces.experiment.Experiment.buildData</code></h3>
+<pre><code class="language-python">expr.buildData(
+    CustomColumns: list[sleapyfaces.structs.CustomColumn]
+    )
+</code></pre>
+<ul>
+<li>Builds the data for the experiment.</li>
+<li>Args:<ul>
+<li><code>CustomColumns</code> (list[<code>CustomColumn</code>]): A list of the <code>CustomColumn</code> objects to be added to the experiment.</li>
+</ul>
+</li>
+<li>Initializes attributes:<ul>
+<li><code>sleap.tracks</code> (<code>pd.DataFrame</code>): The SLEAP data.</li>
+<li><code>custom_columns</code> (<code>pd.DataFrame</code>): The non-numeric columns.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesexperimentexperimentappend"><code>sleapyfaces.experiment.Experiment.append</code></h3>
+<pre><code class="language-python">expr.append(
+    item: pd.Series | pd.DataFrame
+    )
+</code></pre>
+<ul>
+<li>Appends a column to the SLEAP data.</li>
+<li>Args:<ul>
+<li><code>item</code> (<code>pd.Series</code> or <code>pd.DataFrame</code>): A pandas series or dataframe to be appended to the SLEAP data.</li>
+</ul>
+</li>
+<li>Updates attributes:<ul>
+<li><code>sleap.tracks</code> (<code>pd.DataFrame</code>): The SLEAP data.</li>
+<li><code>custom_columns</code> (<code>pd.DataFrame</code>): The non-numeric columns.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesexperimentexperimentbuildtrials"><code>sleapyfaces.experiment.Experiment.buildTrials</code></h3>
+<pre><code class="language-python">expr.buildTrials(
+    TrackedData: list[str],
+    Reduced: list[bool],
+    start_buffer: int = 10000, # Optional
+    end_buffer: int = 13000, # Optional
+    )
+</code></pre>
+<ul>
+<li>Converts the data into trial by trial format.</li>
+<li>Args:<ul>
+<li><code>TrackedData</code> (list[string]): the list of columns from the DAQ data that signify the START of each trial.</li>
+<li><code>Reduced</code> (list[boolean]): a boolean list with the same length as the TrackedData list that signifies the columns from the tracked data with quick TTL pulses that occur during the trial.<ul>
+<li>(e.g. the LED TTL pulse may signify the beginning of a trial, but during the trial the LED turns on and off, so the LED TTL column should be marked as True)</li>
+</ul>
+</li>
+<li><code>start_buffer</code> (integer, optional): The time in miliseconds you want to capture before the trial starts. Defaults to 10000 (i.e. 10 seconds).</li>
+<li><code>end_buffer</code> (integer, optional): The time in miliseconds you want to capture after the trial starts. Defaults to 13000 (i.e. 13 seconds).</li>
+</ul>
+</li>
+<li>Initializes attributes:<ul>
+<li><code>trials</code> (<code>pd.DataFrame</code>): the dataframe with the data in trial by  trial format, with a metaindex of trial number and frame number</li>
+<li><code>trialData</code> (list[<code>pd.DataFrame</code>]): a list of the dataframes with the individual trial data.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesiodaqdata"><code>sleapyfaces.io.DAQData</code></h2>
+<pre><code class="language-python">daq = sleapyfaces.io.DAQData(
+    path: str | PathLike[string]
+    )
+</code></pre>
+<ul>
+<li>Cache for DAQ data.</li>
+<li>Args:<ul>
+<li><code>path</code> (string or PathLike[string]): Path to the directory containing the DAQ data.</li>
+</ul>
+</li>
+<li>Attrs:<ul>
+<li><code>cache</code> (<code>pd.DataFrame</code>): Pandas DataFrame containing the DAQ data.</li>
+<li><code>columns</code> (list[string]): List of column names in the cache.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiodaqdataappend"><code>sleapyfaces.io.DAQData.append</code></h3>
+<pre><code class="language-python">daq.append(
+    name: str,
+    value: list[any]
+    )
+</code></pre>
+<ul>
+<li>Takes in a list with a name and appends it to the cache as a column</li>
+<li>Args:<ul>
+<li><code>name</code> (string): The column name.</li>
+<li><code>value</code> (list[any]): The column data.</li>
+</ul>
+</li>
+<li>Updates attributes:<ul>
+<li><code>cache</code> (<code>pd.DataFrame</code>): Pandas DataFrame containing the DAQ data.</li>
+<li><code>columns</code> (list[string]): List of column names in the cache.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiodaqdatasavedata"><code>sleapyfaces.io.DAQData.saveData</code></h3>
+<pre><code class="language-python">daq.saveData(
+    filename: str | PathLike[str] | FileIO,
+    )
+</code></pre>
+<ul>
+<li>saves the cached data to a csv file</li>
+<li>Args:<ul>
+<li><code>filename</code> (Text | PathLike[Text] | BufferedWriter): the path and name of the file to save the data to</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesiosleapanalysis"><code>sleapyfaces.io.SLEAPanalysis</code></h2>
+<pre><code class="language-python">sleap = sleapyfaces.io.SLEAPanalysis(
+    path: str | PathLike[string]
+    )
+</code></pre>
+<ul>
+<li>a class for reading and storing <code>SLEAP</code> analysis files</li>
+<li>Args:<ul>
+<li><code>path</code> (string or PathLike[string]): path to the directory containing the SLEAP analysis file</li>
+</ul>
+</li>
+<li>Attributes:<ul>
+<li><code>data</code> (dictionary): dictionary of all the data from the <code>SLEAP</code> analysis file</li>
+<li><code>track_names</code> (list): list of the track names from the <code>SLEAP</code> analysis file</li>
+<li><code>tracks</code> (<code>pd.DataFrame</code>): a pandas DataFrame containing the tracks from the <code>SLEAP</code> analysis file (with missing frames filled in using a linear interpolation method)</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiosleapanalysisgetdatasets"><code>sleapyfaces.io.SLEAPanalysis.getDatasets</code></h3>
+<pre><code class="language-python">sleap.getDatasets()
+</code></pre>
+<ul>
+<li>gets the datasets from the <code>SLEAP</code> analysis file</li>
+<li>Initializes Attributes:<ul>
+<li><code>data</code> (dictionary): dictionary of all the data from the <code>SLEAP</code> analysis file</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiosleapanalysisgettracks"><code>sleapyfaces.io.SLEAPanalysis.getTracks</code></h3>
+<pre><code class="language-python">sleap.getTracks()
+</code></pre>
+<ul>
+<li>gets the tracks from the <code>SLEAP</code> analysis file</li>
+<li>Initializes Attributes:<ul>
+<li><code>tracks</code> (<code>pd.DataFrame</code>): a pandas DataFrame containing the tracks from the <code>SLEAP</code> analysis file (with missing frames filled in using a linear interpolation method)</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiosleapanalysisgettracknames"><code>sleapyfaces.io.SLEAPanalysis.getTrackNames</code></h3>
+<pre><code class="language-python">sleap.getTrackNames()
+</code></pre>
+<ul>
+<li>gets the track names from the <code>SLEAP</code> analysis file</li>
+<li>Initializes Attributes:<ul>
+<li><code>track_names</code> (List): list of the track names from the <code>SLEAP</code> analysis file</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiosleapanalysisappend"><code>sleapyfaces.io.SLEAPanalysis.append</code></h3>
+<pre><code class="language-python">sleap.append(
+    item: pd.Series | pd.DataFrame
+)
+</code></pre>
+<ul>
+<li>Appends a column to the tracks DataFrame</li>
+<li>Args:<ul>
+<li><code>item</code> (<code>pd.Series</code> or <code>pd.DataFrame</code>): The column to append to the tracks DataFrame</li>
+</ul>
+</li>
+<li>Updates Attributes:<ul>
+<li><code>tracks</code> (<code>pd.DataFrame</code>): a pandas DataFrame containing the tracks from the <code>SLEAP</code> analysis file</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiosleapanalysissavedata"><code>sleapyfaces.io.SLEAPanalysis.saveData</code></h3>
+<pre><code class="language-python">sleap.saveData(
+    filename: str | PathLike[str],
+    path: str=&quot;SLEAP&quot; # Optional
+)
+</code></pre>
+<ul>
+<li>saves the modified <code>SLEAP</code> analysis data to an HDF5 file</li>
+<li>Args:<ul>
+<li><code>filename</code> (string or PathLike[string]): the path and name of the file to save the data to</li>
+<li>path (string, optional): the internal HDF5 path to save the data to. Defaults to "SLEAP".</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesiobehmetadata"><code>sleapyfaces.io.BehMetadata</code></h2>
+<pre><code class="language-python">beh = sleapyfaces.io.BehMetadata(
+    path: str | PathLike[string],
+    MetaDataKey: str=&quot;beh_metadata&quot;, # Optional
+    TrialArrayKey: str=&quot;trialArray&quot;, # Optional
+    ITIArrayKey: str=&quot;ITIArray&quot;, # Optional
+    )
+</code></pre>
+<ul>
+<li>Cache for JSON data.</li>
+<li>Args:<ul>
+<li><code>path</code> (string of PathLike[string]): Path to the file containing the JSON data.</li>
+<li><code>MetaDataKey</code> (string, optional): Key for the metadata in the JSON data. Defaults to <code>"beh_metadata"</code> based on <code>bruker_control</code>.</li>
+<li><code>TrialArrayKey</code> (string, optional): Key for the trial array in the JSON data. Defaults to <code>"trialArray"</code> based on <code>bruker_control</code>.</li>
+<li><code>ITIArrayKey</code> (string, optional): Key for the inter-trial interval array in the JSON data. Defaults to <code>"ITIArray"</code> based on <code>bruker_control</code>.</li>
+<li>Bruker Control Repository:<ul>
+<li>Link: (https://github.com/Tyelab/bruker_control)[https://github.com/Tyelab/bruker_control]</li>
+<li>Author: Jeremy Delahanty</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Attributes:<ul>
+<li><code>cache</code> (<code>pd.DataFrame</code>): Pandas DataFrame containing the JSON data.</li>
+<li><code>columns</code> (list): List of column names in the cache.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiobehmetadatasavedata"><code>sleapyfaces.io.BehMetadata.saveData</code></h3>
+<pre><code class="language-python">beh.saveData(
+    filename: str | PathLike[str] | FileIO,
+    )
+</code></pre>
+<ul>
+<li>Saves the DAQ data to a <em>CSV</em> file.</li>
+<li>Args:<ul>
+<li><code>filename</code> (string or PathLike[string] or FileIO): The name and path of the file to save the data to.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesiovideometadata"><code>sleapyfaces.io.VideoMetadata</code></h2>
+<pre><code class="language-python">video = sleapyfaces.io.VideoMetadata(
+    path: str | PathLike[string],
+    )
+</code></pre>
+<ul>
+<li>A class for caching the video metadata.</li>
+<li>Args:<ul>
+<li><code>path</code> (string of PathLike[string]): Path to the directory containing the video metadata.</li>
+</ul>
+</li>
+<li>Attributes:<ul>
+<li><code>cache</code> (dictionary): Dictionary containing the video metadata from ffmpeg.</li>
+<li><code>fps</code> (float): The precise frames per second of the video.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesiovideometadatasavedata"><code>sleapyfaces.io.VideoMetadata.saveData</code></h3>
+<pre><code class="language-python">video.saveData(
+    filename: str | PathLike[str] | FileIO,
+    )
+</code></pre>
+<ul>
+<li>Saves the video metadata to a json file.</li>
+<li>Args:<ul>
+<li><code>filename</code> (string or PathLike[string] or FileIO): the name and path of the file to save the data to.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesnormalizemean_center"><code>sleapyfaces.normalize.mean_center</code></h2>
+<pre><code class="language-python">sleapyfaces.normalize.mean_center(
+    data: pd.DataFrame,
+    track_names: list[str]
+    ) -&gt; pd.DataFrame
+</code></pre>
+<ul>
+<li>Mean centers the data for each track.</li>
+<li>Args:<ul>
+<li><code>data</code> (<code>pd.DataFrame</code>): The data to mean center.</li>
+<li><code>track_names</code> (list[str]): The names of the tracks to mean center.</li>
+</ul>
+</li>
+<li>Returns:<ul>
+<li><code>pd.DataFrame</code>: The mean centered data.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesnormalizez_score"><code>sleapyfaces.normalize.z_score</code></h2>
+<pre><code class="language-python">sleapyfaces.normalize.z_score(
+    data: pd.DataFrame,
+    track_names: list[str]
+    ) -&gt; pd.DataFrame
+</code></pre>
+<ul>
+<li>Z-score the data.</li>
+<li>Args:<ul>
+<li><code>data</code> (<code>pd.DataFrame</code>): The data to z-score.</li>
+<li><code>track_names</code> (list[str]): The names of the tracks to z-score.</li>
+</ul>
+</li>
+<li>Returns:<ul>
+<li><code>pd.DataFrame</code>: The z-scored data.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesnormalizepca"><code>sleapyfaces.normalize.pca</code></h2>
+<pre><code class="language-python">sleapyfaces.normalize.pca(
+    data: pd.DataFrame,
+    track_names: list[str]
+    ) -&gt; dict[str, pd.DataFrame]
+</code></pre>
+<ul>
+<li>Runs 2D and 3D PCA dimensionality reduction on the data.</li>
+<li>Args:<ul>
+<li><code>data</code> (<code>pd.DataFrame</code>): The data to be reduced.</li>
+<li><code>track_names</code> (list[str]): The names of the tracks to be reduced.</li>
+</ul>
+</li>
+<li>Returns:<ul>
+<li>dictionary[string, <code>pd.DataFrame</code>]: The reduced data with keys "pca2d" and "pca3d".
+  -i.e. <code>{"pca2d": pd.DataFrame, "pca3d": pd.DataFrame}</code></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesstructsfile"><code>sleapyfaces.structs.File</code></h2>
+<pre><code class="language-python">file = sleapyfaces.structs.File(
+    basepath: str | PathLike[str],
+    filename: str,
+    get_glob: bool=False, # Optional
+    )
+</code></pre>
+<ul>
+<li>A structured file object that contains the base path and filename of a file.</li>
+<li>Args:<ul>
+<li><code>basepath</code> (string): the path to the file.</li>
+<li><code>filename</code> (string): the name of the file, or a glob pattern if <code>get_glob</code> is <code>True</code>.</li>
+<li><code>get_glob</code> (bool, optional): whether or not to get the glob pattern. Defaults to <code>False</code>.</li>
+</ul>
+</li>
+<li>Attributes:<ul>
+<li><code>file</code> (string): the complete filepath</li>
+<li><code>iPath(i)</code> (string): the path to the <code>i</code>th file in the glob pattern.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesstructsfileconstructor"><code>sleapyfaces.structs.FileConstructor</code></h2>
+<pre><code class="language-python">files = sleapyfaces.structs.FileConstructor(
+    daq: File,
+    sleap: File,
+    beh: File,
+    video: File
+    )
+</code></pre>
+<ul>
+<li>Takes in the base paths and filenames of the experimental data and returns them as a structured object.</li>
+<li>Args/Attributes:<ul>
+<li><code>daq</code> (<code>File</code>): The location of the DAQ data file.</li>
+<li><code>sleap</code> (<code>File</code>): The location of the SLEAP analysis file.</li>
+<li><code>beh</code> (<code>File</code>): The location of the behavioral metadata file.</li>
+<li><code>video</code> (<code>File</code>): The location of the video file.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="sleapyfacesstructscustomcolumn"><code>sleapyfaces.structs.CustomColumn</code></h2>
+<pre><code class="language-python">column = sleapyfaces.structs.CustomColumn(
+    ColumnTitle: str,
+    ColumnData: str | int | float | bool
+    )
+</code></pre>
+<ul>
+<li>Takes in the base paths and filenames of the experimental data and returns them as a structured object.</li>
+<li>Args:<ul>
+<li><code>ColumnTitle</code> (string): The title of the column.</li>
+<li><code>ColumnData</code> (string or integer or float or boolean): The data to be added to the column.</li>
+</ul>
+</li>
+</ul>
+<h3 id="sleapyfacesstructscustomcolumnbuildcolumn"><code>sleapyfaces.structs.CustomColumn.buildColumn</code></h3>
+<pre><code class="language-python">column.buildColumn(
+    length: int,
+    )
+</code></pre>
+<ul>
+<li>Initializes a column of a given length.</li>
+<li>Args:<ul>
+<li><code>length</code> (integer): The length of the column to be built.</li>
+</ul>
+</li>
+<li>Initializes Attributes:<ul>
+<li><code>Column</code> (<code>pd.DataFrame</code>): The initialized column at a given length.</li>
+</ul>
+</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../projectstructure/" class="btn btn-neutral float-left" title="Project Structure"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../changelog/" class="btn btn-neutral float-right" title="Change Log">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../projectstructure/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../changelog/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

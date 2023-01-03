@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Project Structure - SLEAPyFaces Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Project Structure";
+        var mkdocs_page_input_path = "projectstructure.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> SLEAPyFaces Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../gettingstarted/">Getting Started</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Project Structure</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#data-files-formats">Data Files Formats</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#daq-file">DAQ file</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#behavioral-metadata-file">Behavioral metadata file</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sleap-file">SLEAP file</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#video-file">Video file</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#project-directory-structure">Project Directory Structure</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../changelog/">Change Log</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">SLEAPyFaces Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Project Structure</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="project-structure">Project Structure</h1>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#project-structure">Project Structure</a><ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#data-files-formats">Data Files Formats</a><ul>
+<li><a href="#daq-file">DAQ file</a></li>
+<li><a href="#behavioral-metadata-file">Behavioral metadata file</a></li>
+<li><a href="#sleap-file">SLEAP file</a></li>
+<li><a href="#video-file">Video file</a></li>
+</ul>
+</li>
+<li><a href="#project-directory-structure">Project Directory Structure</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="data-files-formats">Data Files Formats</h2>
+<h3 id="daq-file">DAQ file</h3>
+<p>This file is the output of the DAQ collection, which is used to record the TTL pulses from all of the stimuli used in the experiment. The DAQ file is usually a CSV file, which contains the timestamps for each TTL pulse, and a column for each TTL pulse being tracked. These timestamps are all relative to the experiment start time and are in milliseconds. The TTL pulses are named according to the following convention:</p>
+<ul>
+<li><code>Stimuli_on</code> - The TTL pulse for when the stimuli starts</li>
+<li><code>Stimuli_on</code> - The TTL pulse for when the stimuli ends</li>
+</ul>
+<h3 id="behavioral-metadata-file">Behavioral metadata file</h3>
+<p>This file is the output of the experimental parameters output from <a href="https://github.com/Tyelab/bruker_control"><code>bruker_control</code></a> as a JSON file. This file contains the experimental parameters for the experiment, including the trial types used, the number of trials, and the inter-trial interval. <code>SLEAPyFaces</code> assumed that the file follows the following structure:</p>
+<pre><code class="language-json">{
+    &quot;beh_metadata&quot;: {
+        ...
+        &quot;any_keys&quot;: &quot;any_values&quot;,
+        ...
+        &quot;trialArray&quot;: [1, 1, 1, 0, 1, 0, 1, 1, ...],
+        &quot;ITIArray&quot;: [16848, 23012, 25678, 19107, ...],
+        ...
+        &quot;any_keys&quot;: &quot;any_values&quot;,
+        ...
+    }
+}
+</code></pre>
+<p>Note that this is the default output from <code>bruker_control</code> and does not need to be modified.</p>
+<h3 id="sleap-file">SLEAP file</h3>
+<p>The <code>SLEAP</code> file is the output of the <code>sleap-convert</code> command from the <code>SLEAP</code> software package, which is used to track the facial expressions of the mice. The <code>SLEAP</code> file is a HDF5 file, which contains the tracking data for each frame of the video using a common skeleton across all experiments. The <code>SLEAP</code> file also contains the metadata for the experiment, which includes the tracking accuracy, the number of frames in the video, and the number of mice in the video. The <code>SLEAP</code> analysis file can be obtained from the following command:</p>
+<pre><code class="language-console">sleap-convert --format analysis -o /path/to/output.h5 /path/to/input.slp
+</code></pre>
+<p><strong>or</strong></p>
+<pre><code class="language-console">sleap-convert --format h5 -o /path/to/output.h5 /path/to/input.slp
+</code></pre>
+<p>Further documentation on this command is available on <a href="https://sleap.ai/guides/cli.html#sleap-convert">this <code>SLEAP</code> documentation page</a>.</p>
+<h3 id="video-file">Video file</h3>
+<p>The video file is the raw video file that was used to generate the facial trackings. The video file is used to extract the frame rate of the video, which is used to accurately calculate the timestamps and append them to the <code>SLEAP</code> data. The video file can be any video format that is supported by <code>ffmpeg</code>, which includes <code>.mp4</code>, <code>.avi</code>, <code>.mov</code>, <code>.mkv</code>, and many more.</p>
+<hr />
+<h2 id="project-directory-structure">Project Directory Structure</h2>
+<pre><code>/base/path/to/project
+    │
+    └───20231208
+    │   │   DAQOutput.csv
+    │   │   ExperimentMetadata.json
+    |   |   SLEAPAnalysis.h5
+    |   |   FacialVideo.mp4
+    │
+    └───20231215
+    |   │   DAQOutput.csv
+    │   │   ExperimentMetadata.json
+    |   |   SLEAPAnalysis.h5
+    |   |   FacialVideo.mp4
+    |
+    └─── ...
+</code></pre>
+<p>Note that the files do not have to be named as shown above, but the file extensions must be correct for the DAQ file as <code>*.csv</code>, the metadata file as <code>*.json</code>, and the <code>SLEAP</code> analysis file as <code>*.h5</code>. The video file can be any video format that is supported by <code>ffmpeg</code>.</p>
+<p>By default, the sub-directories can be named anything, as long as the date proceeds any other naming. The dates must be in the format <code>YYYYMMDD</code>, so the experiments can be sorted by date.</p>
+<blockquote>
+<p>e.g. <code>20231208_Exp1</code> or <code>20231208_Exp2</code> are valid file names, but <code>Exp1_20231208</code> is not</p>
+</blockquote>
+<p>However, this functionality can be disabled by specifying the sub-directory paths and their respective labels in the <code>iterators</code> argument of the <code>Project</code> object. For example, if the project directory structure is as follows:</p>
+<pre><code>/base/path/to/project
+    │
+    └───Day1
+    |   |
+    |   └───Exp1
+    │   │   |   DAQOutput.csv
+    │   │   |   ExperimentMetadata.json
+    |   |   |   SLEAPAnalysis.h5
+    |   |   |   FacialVideo.mp4
+    |   |
+    |   └───Exp2
+    │   │   |   DAQOutput.csv
+    │   │   |   ExperimentMetadata.json
+    |   |   |   SLEAPAnalysis.h5
+    |   |   |   FacialVideo.mp4
+    │
+    └───Day2
+    |   |
+    |   └───Exp1
+    │   │   |   DAQOutput.csv
+    │   │   |   ExperimentMetadata.json
+    |   |   |   SLEAPAnalysis.h5
+    |   |   |   FacialVideo.mp4
+    |   |
+    |   └───Exp2
+    │   │   |   DAQOutput.csv
+    │   │   |   ExperimentMetadata.json
+    |   |   |   SLEAPAnalysis.h5
+    |   |   |   FacialVideo.mp4
+    |
+    └─── ...
+</code></pre>
+<p>Then the <code>Project</code> object can be initialized as follows:</p>
+<pre><code class="language-python">proj = Project(
+    DAQFile=&quot;DAQOutput.csv&quot;,
+    BehFile=&quot;ExperimentMetadata.json&quot;,
+    SLEAPFile=&quot;SLEAPAnalysis.h5&quot;,
+    VideoFile=&quot;FacialVideo.mp4&quot;,
+    base=&quot;/base/path/to/project&quot;,
+    iterators={
+        &quot;Day1-Exp1&quot;: &quot;/Day1/Exp1&quot;,
+        &quot;Day1-Exp2&quot;: &quot;/Day1/Exp2&quot;,
+        &quot;Day2-Exp1&quot;: &quot;/Day2/Exp1&quot;,
+        &quot;Day2-Exp2&quot;: &quot;/Day2/Exp2&quot;,
+        ...
+        }
+    }
+    )
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../gettingstarted/" class="btn btn-neutral float-left" title="Getting Started"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../api/" class="btn btn-neutral float-right" title="API Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../gettingstarted/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../api/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

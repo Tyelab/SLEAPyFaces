@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>SLEAPyFaces Documentation</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> SLEAPyFaces Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#description">Description</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#pages">Pages</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#citing">Citing:</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#license">License</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="gettingstarted/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="projectstructure/">Project Structure</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="api/">API Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="changelog/">Change Log</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">SLEAPyFaces Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="sleapyfaces">SLEAPyFaces</h1>
+<hr />
+<p><em>A package for extracting facial expressions from SLEAP analyses with sensible assumptions.</em></p>
+<p>Based on <a href="https://github.com/annie444/Facial-Expression-Analyses">these</a> scripts</p>
+<p><a href="https://pypi.org/project/sleapyfaces"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/sleapyfaces.svg" /></a>
+<a href="https://pypi.org/project/sleapyfaces"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/sleapyfaces.svg" /></a>
+<a href="https://github.com/pypa/hatch"><img alt="Hatch project" src="https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg" /></a></p>
+<h2 id="description">Description</h2>
+<p>Sleapyfaces is a data analysis package for extracting facial expressions of mice from SLEAP analyses. It is designed to work with the SLEAP software package, which provides a graphical user interface for annotating animal behavioral videos. More information on SLEAP is available at <a href="https://sleap.ai">https://sleap.ai</a>. This package also depends on many assumptions about the data format and structure of the SLEAP analyses. It is not intended to be a general tool for extracting facial expressions from SLEAP analyses, but rather a tool for extracting facial expressions from the specific data format and structure used in the lab of Dr. Kay Tye at The Salk Institute for Biological Studies.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#sleapyfaces">SLEAPyFaces</a><ul>
+<li><a href="#description">Description</a></li>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#pages">Pages</a><ul>
+<li><a href="#citing">Citing:</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="pages">Pages</h2>
+<ul>
+<li><a href="gettingstarted/">Getting Started</a></li>
+<li><a href="projectstructure/">Project Structure</a></li>
+<li><a href="api/">API Reference</a></li>
+<li><a href="changelog/">Change Log</a></li>
+</ul>
+<hr />
+<h3 id="citing">Citing:</h3>
+<p>If you use SLEAPyFaces in your research, this does not fall under <em>standard software</em> according to the <em>Publication Manual</em> for the APA, MLA, AMA, Turabian, IEEE, Vancouver style, Harvard style, or Chicago style guides. <strong>Please cite the following:</strong></p>
+<blockquote>
+<p>A. Ehler,  J. Delahantey, A. Coley, D. LeDuke, L. Keyes, T.D. Pereira, and K. Tye. SLEAPyFaces: A package for extracting facial expressions from SLEAP analyses with sensible assumptions. SLEAPyFaces python package, v1.0.1, 2023. Retrieved from <a href="https://github.com/annie444/sleapyfaces/">https://github.com/annie444/sleapyfaces/</a></p>
+</blockquote>
+<p><strong>BibTeX:</strong></p>
+<pre><code class="language-bibtex"> @misc{Ehler2023sleapyfaces,
+    title={SLEAPyFaces: A package for extracting facial expressions from SLEAP analyses with sensible assumptions.},
+    author={
+        Ehler, Analetta and
+        Delahantey, Jeremey and
+        Coley, Austin and
+        LeDuke, Deryn and
+        Keyes, Laurel and
+        Pereira, Talmo D and
+        Tye, Kay},
+    url={https://github.com/annie444/sleapyfaces/},
+    journal={SLEAPyFaces python package},
+    publisher={GitHub repository},
+    volume={v1.0.1},
+    year={2023},
+    month={Dec},
+    day={27}
+}
+</code></pre>
+<p><strong>Please also cite the original SLEAP paper:</strong></p>
+<blockquote>
+<p>T.D. Pereira, N. Tabris, A. Matsliah, D. M. Turner, J. Li, S. Ravindranath, E. S. Papadoyannis, E. Normand, D. S. Deutsch, Z. Y. Wang, G. C. McKenzie-Smith, C. C. Mitelut, M. D. Castro, J. D’Uva, M. Kislin, D. H. Sanes, S. D. Kocher, S. S-H, A. L. Falkner, J. W. Shaevitz, and M. Murthy. Sleap: A deep learning system for multi-animal pose tracking. Nature Methods, 19(4), 2022</p>
+</blockquote>
+<p><strong>BibTeX:</strong></p>
+<pre><code class="language-bibtex">@ARTICLE{Pereira2022sleap,
+   title={SLEAP: A deep learning system for multi-animal pose tracking},
+   author={Pereira, Talmo D and
+      Tabris, Nathaniel and
+      Matsliah, Arie and
+      Turner, David M and
+      Li, Junyu and
+      Ravindranath, Shruthi and
+      Papadoyannis, Eleni S and
+      Normand, Edna and
+      Deutsch, David S and
+      Wang, Z. Yan and
+      McKenzie-Smith, Grace C and
+      Mitelut, Catalin C and
+      Castro, Marielisa Diez and
+      D'Uva, John and
+      Kislin, Mikhail and
+      Sanes, Dan H and
+      Kocher, Sarah D and
+      Samuel S-H and
+      Falkner, Annegret L and
+      Shaevitz, Joshua W and
+      Murthy, Mala},
+   journal={Nature Methods},
+   volume={19},
+   number={4},
+   year={2022},
+   publisher={Nature Publishing Group}
+   }
+}
+</code></pre>
+<h3 id="license">License</h3>
+<p><code>sleapyfaces</code> is distributed under the terms of the <a href="https://spdx.org/licenses/MIT.html">MIT</a> license. The full license text is available in the <a href="LICENSE">LICENSE</a> file.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="gettingstarted/" class="btn btn-neutral float-right" title="Getting Started">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+      <span><a href="gettingstarted/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme_extra.js" defer></script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.4.2
+Build Date UTC : 2023-01-03 19:05:44.810450+00:00
+-->

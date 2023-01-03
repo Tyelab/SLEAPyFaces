@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Change Log - SLEAPyFaces Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Change Log";
+        var mkdocs_page_input_path = "changelog.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> SLEAPyFaces Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../gettingstarted/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../projectstructure/">Project Structure</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Change Log</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#version-100-2022-12-27">Version 1.0.0 (2022-12-27)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#version-101">Version 1.0.1</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#version-110-in-progress">Version 1.1.0 (in progress)</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">SLEAPyFaces Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Change Log</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="change-log">Change Log:</h1>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#change-log">Change Log:</a><ul>
+<li><a href="#table-of-contents">Table of Contents</a><ul>
+<li><a href="#version-100-2022-12-27">Version 1.0.0 (2022-12-27)</a></li>
+<li><a href="#version-101">Version 1.0.1</a></li>
+<li><a href="#version-110-in-progress">Version 1.1.0 (in progress)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="version-100-2022-12-27">Version 1.0.0 (2022-12-27)</h3>
+<ol>
+<li>iterate (repeatedly) over each mouse and each week (each mouse and each experiment)<ul>
+<li>[x] get project files (experimental) structure</li>
+<li>[x] initialize an iterator over the project structure</li>
+</ul>
+</li>
+<li>get daq data from CSV file<ul>
+<li>[x] read CSV files</li>
+<li>[x] save each column from CSV file<ul>
+<li>Note: CSV columns are of differing lengths</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>get “beh_metadata” from json metadata<ul>
+<li>[x] read JSON file</li>
+<li>[x] grab the values for key “beh_metadata”<ul>
+<li>[x] get the values of sub key “trialArray”</li>
+<li>[x] get the values of sub-key “ITIArray”</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>get video metadata from *.mp4 file (with ffmpeg.probe)<ul>
+<li>[x] read in the *.mp4 metadata</li>
+<li>[x] select the correct video stream</li>
+<li>[x] get the average frames per second</li>
+</ul>
+</li>
+<li>get SLEAP data from *.h5 file<ul>
+<li>[x] open h5 file</li>
+<li>[x] get transposed values of key “tracks” (tracking_locations)</li>
+<li>[x] fill missing locations (linear regress. fit)</li>
+<li>[x] get transposed values of key “edge_inds”</li>
+<li>[x] get values of key “edge_names”</li>
+<li>[x] get transposed values of “instance_scores”</li>
+<li>[x] get transposed values of “point_scores”</li>
+<li>[x] get values of “track_occupancy”</li>
+<li>[x] get transposed values of “tracking_scores”</li>
+<li>[x] get decoded values of “node_names” (make sure there's no encoding issues)</li>
+</ul>
+</li>
+<li>deconstruct SLEAP points into x and y points (across all frames)<ul>
+<li>[x] iterate over each node</li>
+<li>[x] breakup the 4D array “tracks” into 1D array for x and y values respectively<ul>
+<li>Note: [frame, node, x/y, color] for greyscale the color dimension is 1D (i.e. essentially the 4D array is 3D because the color dimension is constant)</li>
+</ul>
+</li>
+<li>[x] iterate over each frame</li>
+<li>[x] assign mouse, week, frame #, and timestamp (using average frames per second)</li>
+</ul>
+</li>
+<li>Split data into individual trials by trial type using the Speaker and LED data from the CSV daq data<ul>
+<li>[x] initialize trial iterators for the consistently documented points from the daq CSV</li>
+<li>[x] iterate over each trial in “trialArray”</li>
+<li>[x] get the index of 10sec before and 13sec after trial start</li>
+<li>[x] for each feature, grab the start and end indices</li>
+<li>[x] store data from each trial in a pd.dataframe</li>
+<li>[x] concatenate all pd.dataframes together for each video</li>
+<li>[x] concatenate the pd.dataframes from each video together for each mouse (base expr split)</li>
+</ul>
+</li>
+<li>Prepare the data<ul>
+<li>[x] (opt.) mean center across all points for a single trial</li>
+<li>[x] mean center across all trials for a single experiment</li>
+<li>[x] mean center across all experiments for a single mouse</li>
+<li>[x] mean center across all mice</li>
+<li>[x] (opt.) z-score mean-centered data</li>
+</ul>
+</li>
+<li>Analyze the data<ul>
+<li>[x] Perform 2D and 3D PCAs on all data (raw, centered, by trial, by week, by mouse, etc…)</li>
+<li>[x] apply gaussian kernel to PCA outputs</li>
+</ul>
+</li>
+<li>Save the data<ul>
+<li>[x] write everything to HDF5 file(s)</li>
+</ul>
+</li>
+</ol>
+<h3 id="version-101">Version 1.0.1</h3>
+<ul>
+<li>[x] add exhaustive documentation</li>
+<li>[x] add inline documentation</li>
+<li>[x] strengthen type hints</li>
+<li>[x] Fix bug where the <code>CustomColumn</code> class is not properly initialized</li>
+<li>[x] Fix bug where the <code>CustomColumn</code> class is not properly built</li>
+<li>[x] Fix bug where the <code>CustomColumn</code> class is not properly appended</li>
+<li>[x] Fix bug where the <code>trials</code> and <code>trialData</code> attributes were not properly initialized</li>
+<li>[x] Fix bug where the <code>trials</code> and <code>trialData</code> attributes were not properly built</li>
+<li>[x] Fix bug where the <code>meanCenter</code> did not properly mean center the data recursively</li>
+</ul>
+<h3 id="version-110-in-progress">Version 1.1.0 (in progress)</h3>
+<ul>
+<li>[ ] add support for multiple mice</li>
+<li>[ ] add clustering/prediction algorithm(s)</li>
+<li>[ ] add velocity, acceleration, and jerk calculations</li>
+<li>[ ] add save option for all data</li>
+<li>[ ] add plotting functions</li>
+<li>[ ] clustering features<ul>
+<li>[ ] distance to a point<ul>
+<li>[ ] vector to a point (theta, magnitude) or (angle, distance)</li>
+</ul>
+</li>
+<li>[ ] velocity/acceleration</li>
+<li>[ ] distance to centroid</li>
+<li>[ ] distance between given points</li>
+</ul>
+</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../api/" class="btn btn-neutral float-left" title="API Reference"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../api/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
