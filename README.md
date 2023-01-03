@@ -8,6 +8,8 @@ Based on [these](https://github.com/annie444/Facial-Expression-Analyses) scripts
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sleapyfaces.svg)](https://pypi.org/project/sleapyfaces)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 [![MIT License](https://img.shields.io/pypi/l/sleapyfaces.svg)](https://github.com/annie444/sleapyfaces/blob/master/LICENSE)
+
+
 [![Documentation](https://www.mkdocs.org/img/favicon.ico)](https://annie444.github.io/SLEAPyFaces/)[Documentation](https://annie444.github.io/SLEAPyFaces/)
 
 ## Description
