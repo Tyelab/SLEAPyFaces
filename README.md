@@ -10,7 +10,7 @@ Based on [these](https://github.com/annie444/Facial-Expression-Analyses) scripts
 [![MIT License](https://img.shields.io/pypi/l/sleapyfaces.svg)](https://github.com/annie444/sleapyfaces/blob/master/LICENSE)
 
 
-[![Documentation](https://www.mkdocs.org/img/favicon.ico)](https://annie444.github.io/SLEAPyFaces/)[Documentation](https://annie444.github.io/SLEAPyFaces/)
+[![Documentation](https://www.mkdocs.org/img/favicon.ico)](https://annie444.github.io/SLEAPyFaces/) - [Documentation](https://annie444.github.io/SLEAPyFaces/)
 
 ## Description
 
