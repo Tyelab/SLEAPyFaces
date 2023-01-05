@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from sleapyfaces.io import SLEAPanalysis, BehMetadata, VideoMetadata, DAQData
 from sleapyfaces.structs import FileConstructor, CustomColumn
 
@@ -6,6 +5,7 @@ from sleapyfaces.utils import into_trial_format, reduce_daq, flatten_list
 
 import pandas as pd
 import numpy as np
+import os
 
 
 class Experiment:
@@ -173,3 +173,14 @@ class Experiment:
         self.trials = pd.concat(
             self.trialData, axis=0, keys=[i for i in range(len(self.trialData))]
         )
+
+    def saveTrials(self, filename, *args):
+        """Saves the trial data to a csv file.
+
+        Args:
+            filename (str): the file to save the HDF5 data to.
+        """
+        with pd.HDFStore(filename) as store:
+            store.put("trials", self.trials, format="table", data_columns=True)
+            for i, trial in enumerate(self.trialData):
+                store.put(f"trialData/trial{i}", trial, format="table", data_columns=True)

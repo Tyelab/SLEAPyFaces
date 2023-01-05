@@ -72,11 +72,11 @@
   - [x] Fix bug where the `trials` and `trialData` attributes were not properly built
   - [x] Fix bug where the `meanCenter` did not properly mean center the data recursively
 ### Version 1.1.0 (in progress)
-  - [ ] add support for multiple mice
+  - [x] add support for multiple mice
   - [ ] add clustering/prediction algorithm(s)
   - [ ] add velocity, acceleration, and jerk calculations
-  - [ ] add save option for all data
-  - [ ] add plotting functions
+  - [x] add save option for all data
+  - [x] add plotting functions
   - [ ] clustering features
       - [ ] distance to a point
           - [ ] vector to a point (theta, magnitude) or (angle, distance)
