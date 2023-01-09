@@ -10,14 +10,15 @@ class Project:
     """Base class for project
 
     Args:
-        base (str): Base path of the project (e.g. "/specialk_cs/2p/raw/CSE009")
-        iterator (dict[str, str]): Iterator for the project files, with keys as the label and values as the folder name (e.g. {"week 1": "20211105", "week 2": "20211112"})
         DAQFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the DAQ files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_events.csv", True) or ("DAQOutput.csv", False))
         ExprMetaFile (str): a tuple with the first argument being the naming convention for the experimental structure files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_config.json", True) or ("BehMetadata.json", False))
         SLEAPFile (str): a tuple with the first argument being the naming convention for the SLEAP files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_sleap.h5", True) or ("SLEAP.h5", False))
         VideoFile (str): a tuple with the first argument being the naming convention for the video files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*.mp4", True) or ("video.avi", False))
+        base (str): Base path of the project (e.g. "/specialk_cs/2p/raw/CSE009")
+        iterator (dict[str, str]): Iterator for the project files, with keys as the label and values as the folder name (e.g. {"week 1": "20211105", "week 2": "20211112"})
         glob (bool): Whether to use glob to find the files (e.g. True or False)
             NOTE: if glob is True, make sure to include the file extension in the naming convention
+        name (str): Name of the project (e.g. "CSE009")
 
     """
 
@@ -46,7 +47,7 @@ class Project:
             for i, week in enumerate(weeks):
                 iterator[f"week {i+1}"] = week
         self.files = iterator
-        self.exprs = {}
+        self.exprs: dict[str, Experiment] = {}
         self.names = list(self.files.keys())
         for name in self.names:
             daq_file = File(
@@ -71,7 +72,7 @@ class Project:
             )
             self.files[name] = FileConstructor(daq_file, sleap_file, beh_file, video_file)
             self.exprs[name] = Experiment(name, self.files[name])
-        self.numeric_columns = self.exprs[self.names[0]].numeric_columns
+        self.numeric_columns = self.exprs[name].numeric_columns
 
     def buildColumns(self, columns: list, values: list):
         """Builds the custom columns for the project and builds the data for each experiment
@@ -148,7 +149,7 @@ class Project:
         self.all_data = z_score(self.all_data, self.numeric_columns)
 
 
-    def analyze(self):
+    def normalize(self):
         """Runs the mean centering and z scoring functions
         """
         analyze_all = [0] * len(self.names)
@@ -221,13 +222,34 @@ class Project:
             else:
                 store.put("projects/all_data", self.all_data)
 
+    @property
+    def data(self) -> pd.DataFrame:
+        if self.all_data is None:
+            self.normalize()
+        return self.all_data
+
 
 class Projects:
+    """Base class for multiple projects
+
+    Args:
+        DAQFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the DAQ files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_events.csv", True) or ("DAQOutput.csv", False))
+        ExprMetaFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the experimental structure files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_config.json", True) or ("BehMetadata.json", False))
+        SLEAPFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the SLEAP files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_sleap.h5", True) or ("SLEAP.h5", False))
+        VideoFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the video files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*.mp4", True) or ("video.avi", False))
+        base (str): the base folder for the project (e.g. "path/to/project")
+        projects_base (dict[str, str]): an iterative dictionary with the keys as the project name and the values as the folder name (e.g. {"Resilient 1": "CSE009", "Control 1": "CSC008"})
+        iterator (dict[str, str]): Iterator for the project files, with keys as the label and values as the folder name (e.g. {"week 1": "20211105", "week 2": "20211112"})
+        glob (bool): Whether to use glob to find the files (e.g. True or False)
+            NOTE: if glob is True, make sure to include the file extension in the naming convention
+        name (str): Name of the project (e.g. "CSE009")
+    """
     def __init__(self,
         DAQFile: tuple[str, bool],
         BehFile: tuple[str, bool],
         SLEAPFile: tuple[str, bool],
         VideoFile: tuple[str, bool],
+        base: str,
         projects_base: dict[str, str],
         iterator: dict[str, str] = {},
         get_glob: bool = False) -> None:
@@ -240,7 +262,7 @@ class Projects:
                 BehFile,
                 SLEAPFile,
                 VideoFile,
-                projects_base[key],
+                os.path.join(base, projects_base[key]),
                 iterator,
                 get_glob,
                 key
@@ -306,10 +328,10 @@ class Projects:
         self.all_data = pd.concat(z_score_all, keys=self.names)
         self.all_data = z_score(self.all_data, self.numeric_columns)
 
-    def analyze(self):
+    def normalize(self):
         analyze_all = [0] * len(self.names)
         for i, name in enumerate(self.names):
-            self.projects[name].analyze()
+            self.projects[name].normalize()
             analyze_all[i] = self.projects[name].all_data
         self.all_data = pd.concat(analyze_all, keys=self.names)
         self.all_data = z_score(self.all_data, self.numeric_columns)
@@ -358,3 +380,9 @@ class Projects:
                 store.put(f"{title}/all_data", self.all_data)
             else:
                 store.put("all_data", self.all_data)
+
+    @property
+    def data(self) -> pd.DataFrame:
+        if self.all_data is None:
+            self.normalize()
+        return self.all_data

@@ -68,7 +68,7 @@ class Experiment:
             self.custom_columns[len(CustomColumns) :], axis=0
         )
         self.custom_columns[len(CustomColumns)].reset_index(inplace=True)
-        self.custom_columns = pd.concat(
+        self.custom_columns: pd.DataFrame = pd.concat(
             self.custom_columns[: (len(CustomColumns) + 1)], axis=1
         )
         self.sleap.append(self.custom_columns.loc[:, col_names])
@@ -184,3 +184,44 @@ class Experiment:
             store.put("trials", self.trials, format="table", data_columns=True)
             for i, trial in enumerate(self.trialData):
                 store.put(f"trialData/trial{i}", trial, format="table", data_columns=True)
+
+    @property
+    def data(self) -> pd.DataFrame:
+        """Returns the latest iteration of the data.
+
+        Returns:
+            pd.DataFrame: the complete dataset.
+        """
+        if self.trials is not None:
+            return self.trials
+        else:
+            return self.sleap.tracks
+
+    @property
+    def quant_cols(self) -> list[str]:
+        """Returns the quantitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the target quantitative data.
+        """
+        return self.numeric_columns
+
+    @property
+    def qual_cols(self) -> list[str]:
+        """Returns the qualitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the qualitative (or rather non-target) data.
+        """
+        cols = self.data.copy().reset_index().columns.to_list()
+        cols = [i for i in cols if i not in self.quant_cols]
+        return cols
+
+    @property
+    def cols(self) -> tuple[list[str], list[str]]:
+        """Returns the target and non target columns of the data.
+
+        Returns:
+            tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
+        """
+        return self.quant_cols, self.qual_cols
