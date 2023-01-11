@@ -42,6 +42,7 @@ class BehMetadata:
         MetaDataKey="beh_metadata",
         TrialArrayKey="trialArray",
         ITIArrayKey="ITIArray",
+        tabs: str = "",
     ):
         self.path = path
         self.MetaDataKey = MetaDataKey
@@ -57,6 +58,9 @@ class BehMetadata:
             columns=[self.TrialArrayKey, self.ITIArrayKey],
         )
         self.columns = self.cache.columns.to_list()
+        print(tabs, "Experimental metadata loaded.")
+        print(tabs + "\t", f"Columns: {self.columns}")
+        print()
 
     def saveData(self, filename: str | PathLike[str] | FileIO) -> None:
         """Saves the DAQ data to a csv file.
@@ -95,12 +99,15 @@ class VideoMetadata:
     cache: dict
     fps: float
 
-    def __init__(self, path: str | PathLike[str]):
+    def __init__(self, path: str | PathLike[str], tabs: str = ""):
         self.path = path
         self.cache = ffmpeg.probe(f"{self.path}")["streams"][
             (int(ffmpeg.probe(f"{self.path}")["format"]["nb_streams"]) - 1)
         ]
         self.fps = float(eval(self.cache.get("avg_frame_rate")))
+        print(tabs, "Video metadata loaded.")
+        print(tabs + "\t", f"Average FPS: {self.fps}")
+        print()
 
     def saveData(self, filename: str | PathLike[str] | FileIO) -> None:
         """Saves the video metadata to a json file.

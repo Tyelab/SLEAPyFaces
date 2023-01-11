@@ -27,14 +27,33 @@ class Projects:
         VideoFile: tuple[str, bool],
         base: str,
         projects_base: dict[str, str],
-        expr_prefix: str = "week",) -> None:
+        expr_prefix: str = "week",
+        tabs: str = "") -> None:
 
         """A class to handle multiple projects"""
+
         self.base_project = projects_base
         self.base_path = base
         self.names = list(projects_base.keys())
         self.files = [os.path.join(self.base_path, path) for path in list(self.base_project.values())]
         self.projects: dict[str, Project] = {}
+        print()
+        print("=========================================")
+        print()
+        print(tabs, "Initializing Projects...")
+        print()
+        print("------------------------------------------")
+        print(tabs+"\t", "Base path:", self.base_path)
+        print(tabs+"\t", "Projects:", self.base_project)
+        print()
+        print(tabs+"\t", "Transforming to:")
+        print("------------------------------------------")
+        print(tabs+"\t\t", "Project keys (names):", self.names)
+        print(tabs+"\t\t", "Project files (paths):", self.files)
+        print("------------------------------------------")
+        print()
+        print("=========================================")
+        print()
         for name, file in self.base_project.items():
             self.projects[name] = Project(
                 DAQFile=DAQFile,
@@ -44,6 +63,7 @@ class Projects:
                 base=os.path.join(self.base_path, file),
                 name=name,
                 expr_prefix=expr_prefix,
+                tabs = tabs + "\t"
             )
         self.numeric_columns = self.projects[self.names[0]].numeric_columns
         self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)

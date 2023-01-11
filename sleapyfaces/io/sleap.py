@@ -42,11 +42,14 @@ class SLEAPanalysis:
     track_names: list[str]
     nodes: list[str]
 
-    def __init__(self, path: str | PathLike[str]):
+    def __init__(self, path: str | PathLike[str], tabs: str = ""):
         self.path = path
         self.getDatasets()
         self.getTracks()
         self.getTrackNames()
+        print(tabs, "SLEAP analysis loaded.")
+        print(tabs + "\t", f"Tracks: {self.track_names}")
+        print()
 
     def getDatasets(
         self,

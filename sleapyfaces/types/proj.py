@@ -32,9 +32,16 @@ class Project:
         base: str,
         name: str = None,
         expr_prefix: str = "week",
-    ):
+        tabs: str = "") -> None:
+
         self.base = base
         self.name = name
+        print()
+        print("=========================================")
+        print(tabs, "Initializing Project...", self.name)
+        print(tabs + "\t", "Path:", self.base)
+        print("=========================================")
+        print()
         self.prefix = expr_prefix
         self.DAQFile = DAQFile
         self.BehFile = BehFile
@@ -52,8 +59,6 @@ class Project:
         self.exprs: dict[str, Experiment] = {}
         self.files: list[str] = [os.path.join(self.base, path) for path in list(self.iterator.values())]
         self.names: list[str] = list(self.iterator.keys())
-        print(self.base)
-        print(self.iterator)
         for name, file in self.iterator.items():
             print(file)
             reuse = os.path.join(self.base, file)
@@ -73,7 +78,7 @@ class Project:
                 reuse,
                 self.VideoFile[0],
                 self.VideoFile[1],
-            )))
+            )), tabs=tabs + "\t")
         self.numeric_columns: list[str] = self.exprs[name].numeric_columns
         self.all_data: pd.DataFrame = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
         self.all_scores: pd.DataFrame = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)

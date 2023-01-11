@@ -25,13 +25,19 @@ class Experiment:
         daq (DAQData): The DAQData object containing the DAQ data.
         numeric_columns (list[str]): A list of the titles of the numeric columns in the SLEAP data.
     """
-    def __init__(self, name: str, files: FileConstructor):
+    def __init__(self, name: str, files: FileConstructor, tabs: str = ""):
         self.name = name
         self.files = files
-        self.sleap = SLEAPanalysis(self.files.sleap.file)
-        self.beh = BehMetadata(self.files.beh.file)
-        self.video = VideoMetadata(self.files.video.file)
-        self.daq = DAQData(self.files.daq.file)
+        print()
+        print("=========================================")
+        print(tabs, "Initializing Experiment...")
+        print(tabs + "\t", "Path:", self.files.sleap.basepath)
+        print("=========================================")
+        print()
+        self.sleap = SLEAPanalysis(self.files.sleap.file, tabs=tabs + "\t")
+        self.beh = BehMetadata(self.files.beh.file, tabs=tabs + "\t")
+        self.video = VideoMetadata(self.files.video.file, tabs=tabs + "\t")
+        self.daq = DAQData(self.files.daq.file, tabs=tabs + "\t")
         self.numeric_columns = self.sleap.track_names
 
     def buildData(self, CustomColumns: list[CustomColumn]):
