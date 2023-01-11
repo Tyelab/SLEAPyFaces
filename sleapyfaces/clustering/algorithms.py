@@ -25,6 +25,7 @@ class Cluster:
     def __init__(self, data: dataobjectprotocol, prediction_column: str, pipeline: bool = False):
         from sklearn.model_selection import train_test_split
 
+        print("Clustering...")
         self.data = data.extract
         self.cols = data.cols
         self.pred = prediction_column
@@ -56,6 +57,7 @@ class Cluster:
         from sklearn.cluster import KMeans
         from sklearn.metrics import silhouette_score
 
+        print("\t KMeans Clustering...")
         if "n_clusters" in kwargs or len(args) != 0:
             if "n_clusters" in kwargs:
                 n_clusters = kwargs["n_clusters"]
@@ -90,6 +92,7 @@ class Cluster:
         from sklearn.cluster import AffinityPropagation
         from sklearn.metrics import silhouette_score
 
+        print("\t Affinity Propagation Clustering...")
         if "n_clusters" in kwargs or len(args) != 0:
             if "n_clusters" in kwargs:
                 n_clusters = kwargs["n_clusters"]
@@ -117,10 +120,11 @@ class Cluster:
         if output:
             return ap
 
-    def heirarchical(self, output: bool = False,  *args, **kwargs):
+    def hierarchical(self, output: bool = False,  *args, **kwargs):
         from sklearn.cluster import AgglomerativeClustering
         from sklearn.metrics import silhouette_score
 
+        print("\t Hierarchical Clustering (Agglomerative)...")
         if "n_clusters" in kwargs or len(args) != 0:
             if "n_clusters" in kwargs:
                 n_clusters = kwargs["n_clusters"]
@@ -147,6 +151,8 @@ class Cluster:
     def dbscan(self, output: bool = False, *args, **kwargs):
         from sklearn.cluster import DBSCAN
         from sklearn.metrics import silhouette_score
+
+        print("\t DBSCAN Clustering...")
 
         if "eps" in kwargs or len(args) != 0:
             if "eps" in kwargs:
@@ -175,6 +181,7 @@ class Cluster:
         from sklearn.cluster import Birch
         from sklearn.metrics import silhouette_score
 
+        print("\t Birch Clustering...")
         if "n_clusters" in kwargs or len(args) != 0:
             if "n_clusters" in kwargs:
                 n_clusters = kwargs["n_clusters"]
@@ -198,6 +205,7 @@ class Cluster:
         from sklearn.svm import OneClassSVM
         from sklearn.metrics import silhouette_score
 
+        print("\t One Class SVM anomaly detection...")
         if "n_clusters" in kwargs or len(args) != 0:
             if "n_clusters" in kwargs:
                 n_clusters = kwargs["n_clusters"]

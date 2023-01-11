@@ -29,6 +29,7 @@ class FeatureExtractor:
 
     def __init__(self, dataObject: dataobjectprotocol, base_features: list[str]):
 
+        print("Extracting Features...")
         self.basefeats: list[str] = base_features
 
         self.cartesian: pd.DataFrame = dataObject.data
@@ -92,6 +93,7 @@ class FeatureExtractor:
         return centroid if not inplace else None
 
     def twoPointsDist(self, pointa: str, pointb: str, inplace: bool = False) -> pd.DataFrame | None:
+        print("\t Extracting distance between points:", pointa, "and", pointb)
         if pointa not in self.points or pointb not in self.points:
             raise ValueError(f"Point {pointa} or {pointb} not found")
         self.calcsLog.append(f"twoPointsDist(pointa={pointa}, pointb={pointb}, inplace={inplace})")
@@ -100,6 +102,7 @@ class FeatureExtractor:
         return distance if not inplace else None
 
     def distToCentroid(self, point: str, centroid: str, inplace: bool = False) -> pd.DataFrame | None:
+        print("\t Extracting distance between point and centroid:", point, "and", centroid)
         if centroid not in self.basefeats:
             raise ValueError(f"Centroid {centroid} not found")
         if point not in self.points:
@@ -111,6 +114,7 @@ class FeatureExtractor:
         return distance if not inplace else None
 
     def twoCentroidsDist(self, centroida: str, centroidb: str, inplace: bool = False) -> pd.DataFrame | None:
+        print("\t Extracting distance between centroids:", centroida, "and", centroidb)
         if centroida not in self.basefeats:
             raise ValueError(f"Centroid 1 {centroida} not found")
         if centroidb not in self.basefeats:
@@ -137,7 +141,6 @@ class FeatureExtractor:
         if centroid_df is None:
             raise ValueError(f"Centroid {centroid} not found")
         angle = centroid_df.loc[:, (centroid, "theta")]
-        self.calcData = pd.concat([self.calcData, angle], axis=1)
         return angle if not inplace else None
 
     def velocities(self, inplace: bool = False) -> pd.DataFrame | None:
