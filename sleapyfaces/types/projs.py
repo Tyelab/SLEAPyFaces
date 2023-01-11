@@ -54,6 +54,7 @@ class Projects:
         print()
         print("=========================================")
         print()
+        self.tabs = tabs
         for name, file in self.base_project.items():
             self.projects[name] = Project(
                 DAQFile=DAQFile,
@@ -80,6 +81,7 @@ class Projects:
             projects.custom_columns (list[CustomColumn]): list of custom columns
             projects.all_data (pd.DataFrame): the data for all experiments concatenated together
         """
+        print(self.tabs, "Building columns...")
         for project in self.projects.values():
             project.buildColumns(columns, values)
         self.custom_columns = self.projects[self.names[0]].custom_columns
@@ -106,6 +108,7 @@ class Projects:
             projects[name].exprs[exprName].trials (pd.DataFrame): the data frame containing the concatenated trial data for each experiment
             projects[name].exprs[exprName].trialData (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
         """
+        print(self.tabs, "Building trials...")
         for project in self.projects.values():
             project.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
         self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
@@ -140,6 +143,7 @@ class Projects:
                 ), self.numeric_columns)
 
     def normalize(self):
+        print(self.tabs, "Normalizing...")
         for project in self.projects.values():
             project.normalize()
         self.all_data = z_score(
@@ -189,6 +193,7 @@ class Projects:
         Args:
             filename (str): The filename to save the data to
         """
+        print(self.tabs, "Saving...")
         for name in self.names:
             self.projects[name].saveAll(filename)
         with pd.HDFStore(filename) as store:

@@ -59,8 +59,8 @@ class Project:
         self.exprs: dict[str, Experiment] = {}
         self.files: list[str] = [os.path.join(self.base, path) for path in list(self.iterator.values())]
         self.names: list[str] = list(self.iterator.keys())
+        self.tabs = tabs
         for name, file in self.iterator.items():
-            print(file)
             reuse = os.path.join(self.base, file)
             self.exprs[name]: Experiment = Experiment(name, FileConstructor(File(
                 reuse,
@@ -95,6 +95,8 @@ class Project:
             all_data (pd.DataFrame): the data for all experiments concatenated together
             all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
+        print(self.tabs, "Building custom columns:")
+        print(self.tabs, [(col, val) for col, val in zip(columns, values)])
         self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
         for expr in self.exprs.values():
             expr.buildData(self.custom_columns)
@@ -122,6 +124,7 @@ class Project:
             all_data (pd.DataFrame): the data for all experiments and trials concatenated together
             all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
+        print(self.tabs, "Building trials for project:", self.name)
         for expr in self.exprs.values():
             expr.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
         self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
@@ -173,6 +176,7 @@ class Project:
         Updates attributes:
             all_data (pd.DataFrame): the normaized data for all experiments concatenated together
         """
+        print(self.tabs, "Normalizing project", self.name)
         for expr in self.exprs.values():
                 expr.normalize()
         self.all_data = z_score(
@@ -231,6 +235,7 @@ class Project:
         Args:
             filename (str): The filename to save the data to
         """
+        print(self.tabs, "Saving project:", self.name)
         for expr in self.exprs.values():
             expr.saveTrials(filename)
         with pd.HDFStore(filename) as store:

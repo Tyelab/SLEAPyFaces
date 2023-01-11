@@ -34,6 +34,7 @@ class Experiment:
         print(tabs + "\t", "Path:", self.files.sleap.basepath)
         print("=========================================")
         print()
+        self.tabs = tabs
         self.sleap = SLEAPanalysis(self.files.sleap.file, tabs=tabs + "\t")
         self.beh = BehMetadata(self.files.beh.file, tabs=tabs + "\t")
         self.video = VideoMetadata(self.files.video.file, tabs=tabs + "\t")
@@ -56,6 +57,7 @@ class Experiment:
             sleap.tracks (pd.DataFrame): The SLEAP data.
             custom_columns (pd.DataFrame): The non-numeric columns.
         """
+        print(self.tabs, "Building columns for experiment:", self.name)
         self.custom_columns = [0] * (len(self.sleap.tracks.index) + len(CustomColumns))
         col_names = [0] * (len(CustomColumns) + 2)
         for i, col in enumerate(CustomColumns):
@@ -118,7 +120,7 @@ class Experiment:
                 trials (pd.DataFrame): the dataframe with the data in trial by 	trial format, with a metaindex of trial number and frame number
                 trialData (list[pd.DataFrame]): a list of the dataframes with the individual trial data.
         """
-
+        print(self.tabs, "Building trials for experiment:", self.name)
         if len(Reduced) != len(TrackedData):
             raise ValueError(
                 "The number of Reduced arguments must be equal to the number of TrackedData arguments. NOTE: If you do not want to reduce the data, pass in a list of False values."
@@ -201,6 +203,7 @@ class Experiment:
         Args:
             filename (str): the file to save the HDF5 data to.
         """
+        print(self.tabs, "Saving experiment:", self.name)
         with pd.HDFStore(filename) as store:
             store.put("trials", self.trials, format="table", data_columns=True)
             for i, trial in enumerate(self.trialData):
@@ -256,6 +259,7 @@ class Experiment:
         Updates attributes:
             all_data (pd.DataFrame): the normaized data for all experiments concatenated together
         """
+        print(self.tabs, "Normalizing experiment:", self.name)
         self.all_data = z_score(
                             pd.concat(
                                 [
