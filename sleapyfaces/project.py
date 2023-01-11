@@ -4,6 +4,7 @@ from sleapyfaces.experiment import Experiment
 from sleapyfaces.normalize import mean_center, z_score, pca
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 class Project:
@@ -30,7 +31,7 @@ class Project:
         VideoFile: tuple[str, bool],
         base: str,
         iterator: dict[str, str] = {},
-        name: str = "",
+        name: str = None,
     ):
         self.base = base
         self.name = name
@@ -46,33 +47,30 @@ class Project:
             weeks.sort()
             for i, week in enumerate(weeks):
                 iterator[f"week {i+1}"] = week
-        self.files = iterator
         self.exprs: dict[str, Experiment] = {}
-        self.names = list(self.files.keys())
-        for name in self.names:
-            daq_file = File(
-                os.path.join(self.base, self.files[name]),
+        self.files: list[str] = [os.path.join(base, path) for path in list(iterator.values())]
+        self.names: list[str] = list(iterator.keys())
+        for name, file in iterator.items():
+            self.exprs[name]: Experiment = Experiment(name, FileConstructor(File(
+                os.path.join(self.base, file),
                 self.DAQFile[0],
                 self.DAQFile[1],
-            )
-            sleap_file = File(
-                os.path.join(self.base, self.files[name]),
+            ), File(
+                os.path.join(self.base, file),
                 self.SLEAPFile[0],
                 self.SLEAPFile[1],
-            )
-            beh_file = File(
-                os.path.join(self.base, self.files[name]),
+            ), File(
+                os.path.join(self.base, file),
                 self.BehFile[0],
                 self.BehFile[1],
-            )
-            video_file = File(
-                os.path.join(self.base, self.files[name]),
+            ), File(
+                os.path.join(self.base, file),
                 self.VideoFile[0],
                 self.VideoFile[1],
-            )
-            self.files[name] = FileConstructor(daq_file, sleap_file, beh_file, video_file)
-            self.exprs[name] = Experiment(name, self.files[name])
-        self.numeric_columns = self.exprs[name].numeric_columns
+            )))
+        self.numeric_columns: list[str] = self.exprs[name].numeric_columns
+        self.all_data: pd.DataFrame = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
+        self.all_scores: pd.DataFrame = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
     def buildColumns(self, columns: list, values: list):
         """Builds the custom columns for the project and builds the data for each experiment
@@ -84,17 +82,13 @@ class Project:
         Initializes attributes:
             custom_columns (list[CustomColumn]): list of custom columns
             all_data (pd.DataFrame): the data for all experiments concatenated together
+            all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
-        self.custom_columns = [0] * len(columns)
-        for i in range(len(self.custom_columns)):
-            self.custom_columns[i] = CustomColumn(columns[i], values[i])
-        exprs_list = [0] * len(self.names)
-        names_list = [0] * len(self.names)
-        for i, name in enumerate(self.names):
-            self.exprs[name].buildData(self.custom_columns)
-            exprs_list[i] = self.exprs[name].sleap.tracks
-            names_list[i] = self.exprs[name].name
-        self.all_data = pd.concat(exprs_list, keys=names_list)
+        self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
+        for expr in self.exprs.values():
+            expr.buildData(self.custom_columns)
+        self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
+        self.all_scores = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
     def buildTrials(
         self,
@@ -114,59 +108,70 @@ class Project:
         Initializes attributes:
             exprs[i].trials (pd.DataFrame): the data frame containing the concatenated trial data for each experiment
             exprs[i].trialData (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
+            all_data (pd.DataFrame): the data for all experiments and trials concatenated together
+            all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
-        for name in self.names:
-            self.exprs[name].buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        for expr in self.exprs.values():
+            expr.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
+        self.all_scores = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
-    def meanCenter(self):
+    def meanCenter(self, alldata: bool = False):
         """Recursively mean centers the data for each trial for each experiment
 
-        Initializes attributes:
+        Updates attributes:
             all_data (pd.DataFrame): the mean centered data for all trials and experiments concatenated together
         """
-        mean_all = [0] * len(self.names)
-        for i, name in enumerate(self.names):
-            mean_all[i] = [0] * len(self.exprs[name].trialData)
-            for j in range(len(self.exprs[name].trialData)):
-                mean_all[i][j] = mean_center(
-                    self.exprs[name].trialData[i], self.numeric_columns
-                )
-            mean_all[i] = pd.concat(
-                mean_all[i],
-                axis=0,
-                keys=range(len(mean_all[i])),
-            )
-            mean_all[i] = mean_center(mean_all[i], self.numeric_columns)
-        self.all_data = pd.concat(mean_all, keys=self.names)
-        self.all_data = mean_center(self.all_data, self.numeric_columns)
+        if alldata:
+            self.all_data = mean_center(self.all_data, self.numeric_columns)
+        else:
+            for expr in self.exprs.values():
+                expr.meanCenter()
+            self.all_data = mean_center(
+                pd.concat(
+                    [
+                        expr.data for expr in self.exprs.values()
+                    ],
+                    keys=self.names
+                ),
+                self.numeric_columns)
 
-    def zScore(self):
+    def zScore(self, alldata: bool = False):
         """Z scores the mean centered data for each experiment
 
         Updates attributes:
             all_data (pd.DataFrame): the z-scored data for all experiments concatenated together
         """
-        self.all_data = z_score(self.all_data, self.numeric_columns)
-
+        if alldata:
+            self.all_data = z_score(self.all_data, self.numeric_columns)
+        else:
+            for expr in self.exprs.values():
+                expr.zScore()
+            self.all_data = z_score(
+                pd.concat(
+                    [
+                        expr.data for expr in self.exprs.values()
+                    ],
+                    keys=self.names
+                ),
+                self.numeric_columns)
 
     def normalize(self):
         """Runs the mean centering and z scoring functions
+
+        Updates attributes:
+            all_data (pd.DataFrame): the normaized data for all experiments concatenated together
         """
-        analyze_all = [0] * len(self.names)
-        for i, name in enumerate(self.names):
-            analyze_all[i] = [0] * len(self.exprs[name].trialData)
-            for j in range(len(self.exprs[name].trialData)):
-                analyze_all[i][j] = mean_center(
-                    self.exprs[name].trialData[i], self.numeric_columns
-                )
-            analyze_all[i] = pd.concat(
-                analyze_all[i],
-                axis=0,
-                keys=range(len(analyze_all[i])),
-            )
-            analyze_all[i] = z_score(analyze_all[i], self.numeric_columns)
-        self.all_data = pd.concat(analyze_all, keys=self.names)
-        self.all_data = z_score(self.all_data, self.numeric_columns)
+        for expr in self.exprs.values():
+                expr.normalize()
+        self.all_data = z_score(
+                pd.concat(
+                    [
+                        expr.data for expr in self.exprs.values()
+                    ],
+                    keys=self.names
+                ),
+                self.numeric_columns)
 
     def runPCA(self):
         """Reduces `all_data` to 2 and 3 dimensions using PCA
@@ -174,25 +179,25 @@ class Project:
         Initializes attributes:
             pcas (dict[str, pd.DataFrame]): a dictionary containing the 2 and 3 dimensional PCA data for each experiment (the keys are 'pca2d', 'pca3d')
         """
-        self.pcas = pca(self.all_data, self.numeric_columns)
+        self.pcas = pca(self.data, self.numeric_columns)
 
-    def visualize(self, dimentions: int, filename=None, *args, **kwargs):
+    def visualize(self, dimensions: int, filename: str = None, *args, **kwargs) -> go.Figure:
         """Plots the data from the PCA
 
         Args:
             filename (str, optional): The filename to save the plot to. Defaults to None.
         """
-        if dimentions == 2:
-            fig = px.scatter(self.pcas[f"pca{dimentions}d"], x="principal component 1", y="principal component 2", color="Mouse")
-        elif dimentions == 3:
-            fig = px.scatter_3d(self.pcas[f"pca{dimentions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
+        if dimensions == 2:
+            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color="Mouse")
+        elif dimensions == 3:
+            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
         else:
-            raise ValueError("dimentions must be 2 or 3")
+            raise ValueError("dimensions must be 2 or 3")
         if filename is not None:
             fig.write_image(filename, *args, **kwargs)
-        fig.show()
+        return fig
 
-    def save(self, filename: str, title: str = None):
+    def save(self, filename: str | pd.HDFStore, title: str = None):
         """Saves the project data to a HDF5 file
 
         Args:
@@ -200,11 +205,14 @@ class Project:
         """
         with pd.HDFStore(filename) as store:
             if self.name is not None:
-                store.put(f"projects/{self.name}", self.all_data)
+                store.put(f"projects/{self.name}/data", self.data)
+                store.put(f"projects/{self.name}/scores", self.scores)
             elif title is not None:
-                store.put(f"projects/{title}", self.all_data)
+                store.put(f"projects/{title}/data", self.data)
+                store.put(f"projects/{title}/scores", self.scores)
             else:
-                store.put("all_data", self.all_data)
+                store.put("all_data", self.data)
+                store.put("all_scores", self.scores)
 
     def saveAll(self, filename: str, title: str = None):
         """Saves all the data to a HDF5 file
@@ -212,21 +220,60 @@ class Project:
         Args:
             filename (str): The filename to save the data to
         """
-        for name in self.names:
-            self.exprs[name].saveTrials(filename)
+        for expr in self.exprs.values():
+            expr.saveTrials(filename)
         with pd.HDFStore(filename) as store:
             if self.name is not None:
-                store.put(f"projects/{self.name}", self.all_data)
+                store.put(f"projects/{self.name}/data", self.data)
+                store.put(f"projects/{self.name}/scores", self.scores)
             elif title is not None:
-                store.put(f"projects/{title}", self.all_data)
+                store.put(f"projects/{title}/data", self.data)
+                store.put(f"projects/{title}/scores", self.scores)
             else:
-                store.put("projects/all_data", self.all_data)
+                store.put("projects/all_data", self.data)
+                store.put("projects/all_scores", self.scores)
 
     @property
     def data(self) -> pd.DataFrame:
-        if self.all_data is None:
-            self.normalize()
+        if len(self.all_data.index.levshape) == 3:
+            self.all_data.index.set_names(["Experiment", "Trial", "Trial_frame"], inplace=True)
+        elif len(self.all_data.index.levshape) == 1:
+            self.all_data.index.set_names(["Experiment"], inplace=True)
+
         return self.all_data
+
+    @property
+    def scores(self) -> pd.DataFrame:
+        return self.all_scores
+
+    @property
+    def quant_cols(self) -> list[str]:
+        """Returns the quantitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the target quantitative data.
+        """
+        return self.numeric_columns
+
+    @property
+    def qual_cols(self) -> list[str]:
+        """Returns the qualitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the qualitative (or rather non-target) data.
+        """
+        cols = self.data.reset_index().columns.to_list()
+        cols = [i for i in cols if i not in self.quant_cols]
+        return cols
+
+    @property
+    def cols(self) -> tuple[list[str], list[str]]:
+        """Returns the target and non target columns of the data.
+
+        Returns:
+            tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
+        """
+        return (self.quant_cols, self.qual_cols)
 
 
 class Projects:
@@ -251,24 +298,26 @@ class Projects:
         VideoFile: tuple[str, bool],
         base: str,
         projects_base: dict[str, str],
-        iterator: dict[str, str] = {},
-        get_glob: bool = False) -> None:
+        iterator: dict[str, str] = None) -> None:
+
         """A class to handle multiple projects"""
+
         self.names = list(projects_base.keys())
-        proj = {}
-        for key in list(projects_base.keys()):
-            proj[key] = Project(
+        self.files = [os.path.join(base, path) for path in list(projects_base.values())]
+        self.projects: dict[str, Project] = {}
+        for name, file in projects_base.items():
+            self.projects[name] = Project(
                 DAQFile,
                 BehFile,
                 SLEAPFile,
                 VideoFile,
-                os.path.join(base, projects_base[key]),
+                os.path.join(base, file),
                 iterator,
-                get_glob,
-                key
+                name
             )
-        self.projects = proj
         self.numeric_columns = self.projects[self.names[0]].numeric_columns
+        self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
+        self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
 
     def buildColumns(self, columns: list, values: list):
         """Builds the custom columns for each project and builds the data for each experiment
@@ -277,17 +326,15 @@ class Projects:
             columns (list[str]): the column titles
             values (list[any]): the data for each column
 
-        Initializes attributes:
+        Updates attributes:
             projects.custom_columns (list[CustomColumn]): list of custom columns
             projects.all_data (pd.DataFrame): the data for all experiments concatenated together
         """
-        for name in self.names:
-            self.projects[name].buildColumns(columns, values)
+        for project in self.projects.values():
+            project.buildColumns(columns, values)
         self.custom_columns = self.projects[self.names[0]].custom_columns
-        self.all_data = len(self.names)
-        for i, name in enumerate(self.names):
-            self.all_data[i] = self.projects[name].all_data
-        self.all_data = pd.concat(self.all_data, keys=self.names)
+        self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
+        self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
 
 
     def buildTrials(
@@ -309,51 +356,70 @@ class Projects:
             projects[name].exprs[exprName].trials (pd.DataFrame): the data frame containing the concatenated trial data for each experiment
             projects[name].exprs[exprName].trialData (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
         """
-        for name in self.names:
-            self.projects[name].buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        for project in self.projects.values():
+            project.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
+        self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
 
-    def meanCenter(self):
-        mean_all = [0] * len(self.names)
-        for i, name in enumerate(self.names):
-            self.projects[name].meanCenter()
-            mean_all[i] = self.projects[name].all_data
-        self.all_data = pd.concat(mean_all, keys=self.names)
-        self.all_data = mean_center(self.all_data, self.numeric_columns)
+    def meanCenter(self, alldata: bool = False):
+        if alldata:
+            self.all_data = mean_center(self.all_data, self.numeric_columns)
+        else:
+            for project in self.projects.values():
+                project.meanCenter()
+            self.all_data = mean_center(
+                pd.concat(
+                    [
+                        project.all_data
+                        for project in self.projects.values()
+                    ], keys=self.names
+                ), self.numeric_columns)
 
-    def zScore(self):
-        z_score_all = [0] * len(self.names)
-        for i, name in enumerate(self.names):
-            self.projects[name].zScore()
-            z_score_all[i] = self.projects[name].all_data
-        self.all_data = pd.concat(z_score_all, keys=self.names)
-        self.all_data = z_score(self.all_data, self.numeric_columns)
+    def zScore(self, alldata: bool = False):
+        if alldata:
+            self.all_data = z_score(self.all_data, self.numeric_columns)
+        else:
+            for project in self.projects.values():
+                project.zScore()
+            self.all_data = z_score(
+                pd.concat(
+                    [
+                        project.all_data
+                        for project in self.projects.values()
+                    ], keys=self.names
+                ), self.numeric_columns)
 
     def normalize(self):
-        analyze_all = [0] * len(self.names)
-        for i, name in enumerate(self.names):
-            self.projects[name].normalize()
-            analyze_all[i] = self.projects[name].all_data
-        self.all_data = pd.concat(analyze_all, keys=self.names)
-        self.all_data = z_score(self.all_data, self.numeric_columns)
+        for project in self.projects.values():
+            project.normalize()
+        self.all_data = z_score(
+            pd.concat(
+                    [
+                        project.all_data
+                        for project in self.projects.values()
+                    ], keys=self.names
+                ),
+            self.numeric_columns
+        )
 
     def runPCA(self):
         self.pcas = pca(self.all_data, self.numeric_columns)
 
-    def visualize(self, dimentions: int, filename=None, *args, **kwargs):
+    def visualize(self, dimensions: int, filename=None, *args, **kwargs) -> go.Figure:
         """Plots the data from the PCA
 
         Args:
             filename (str, optional): The filename to save the plot to. Defaults to None.
         """
-        if dimentions == 2:
-            fig = px.scatter(self.pcas[f"pca{dimentions}d"], x="principal component 1", y="principal component 2", color="Mouse")
-        elif dimentions == 3:
-            fig = px.scatter_3d(self.pcas[f"pca{dimentions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
+        if dimensions == 2:
+            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color="Mouse")
+        elif dimensions == 3:
+            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
         else:
-            raise ValueError("dimentions must be 2 or 3")
+            raise ValueError("dimensions must be 2 or 3")
         if filename is not None:
             fig.write_image(filename, *args, **kwargs)
-        fig.show()
+        return fig
 
     def save(self, filename: str, title: str = None):
         """Saves projects data to a HDF5 file
@@ -383,6 +449,37 @@ class Projects:
 
     @property
     def data(self) -> pd.DataFrame:
-        if self.all_data is None:
-            self.normalize()
         return self.all_data
+
+    @property
+    def scores(self) -> pd.DataFrame:
+        return self.all_scores
+
+    @property
+    def quant_cols(self) -> list[str]:
+        """Returns the quantitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the target quantitative data.
+        """
+        return self.numeric_columns
+
+    @property
+    def qual_cols(self) -> list[str]:
+        """Returns the qualitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the qualitative (or rather non-target) data.
+        """
+        cols = self.data.reset_index().columns.to_list()
+        cols = [i for i in cols if i not in self.quant_cols]
+        return cols
+
+    @property
+    def cols(self) -> tuple[list[str], list[str]]:
+        """Returns the target and non target columns of the data.
+
+        Returns:
+            tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
+        """
+        return self.quant_cols, self.qual_cols

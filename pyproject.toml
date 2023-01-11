@@ -36,15 +36,20 @@ classifiers = [
 ]
 dependencies = [
   "click",
+  "pytest",
+  "pytest-cov",
   "pandas",
   "numpy",
   "scipy",
   "scikit-learn",
+  "tables",
   "ffmpeg-python",
   "h5py",
-  "tables",
   "python-rapidjson",
   "matplotlib",
+  "statsmodels",
+  "seaborn",
+  "geomstats"
 ]
 dynamic = ["version"]
 

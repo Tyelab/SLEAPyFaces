@@ -73,13 +73,13 @@
   - [x] Fix bug where the `meanCenter` did not properly mean center the data recursively
 ### Version 1.1.0 (in progress)
   - [x] add support for multiple mice
-  - [ ] add clustering/prediction algorithm(s)
+  - [x] add clustering/prediction algorithm(s)
   - [ ] add velocity, acceleration, and jerk calculations
   - [x] add save option for all data
   - [x] add plotting functions
-  - [ ] clustering features
-      - [ ] distance to a point
-          - [ ] vector to a point (theta, magnitude) or (angle, distance)
+  - [x] clustering features
+      - [x] distance to a point
+          - [x] vector to a point (theta, magnitude) or (angle, distance)
       - [ ] velocity/acceleration
-      - [ ] distance to centroid
-      - [ ] distance between given points
+      - [x] distance to centroid
+      - [x] distance between given points
