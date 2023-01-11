@@ -1,5 +1,5 @@
 from sleapyfaces.experiment import Experiment
-from sleapyfaces.structs import File, FileConstructor, CustomColumn
+from sleapyfaces.utils.structs import File, FileConstructor, CustomColumn
 from sleapyfaces.io import SLEAPanalysis
 import pandas as pd
 

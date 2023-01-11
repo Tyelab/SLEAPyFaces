@@ -1,6 +1,6 @@
 from matplotlib.patches import Circle
 from numpy import tri
-from sleapyfaces.structs import CustomColumn, File, FileConstructor
+from sleapyfaces.utils.structs import CustomColumn, File, FileConstructor
 import pandas as pd
 
 

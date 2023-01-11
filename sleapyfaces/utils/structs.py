@@ -28,10 +28,10 @@ class File:
         self.basepath = basepath
         self.filename = filename
         self.get_glob = get_glob
-        if self.get_glob:
-            self.file = glob.glob(os.path.join(self.basepath, self.filename))[0]
-        else:
-            self.file = os.path.join(self.basepath, self.filename)
+
+        self.file = glob.glob(os.path.join(self.basepath, self.filename)) if self.get_glob else os.path.join(self.basepath, self.filename)
+        print(self.file)
+        self.file = self.file[0] if type(self.file) is list else self.file
 
     def iPath(self, i: int) -> str:
         """Returns the ith path in the file path."""

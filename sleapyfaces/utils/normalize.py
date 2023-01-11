@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.decomposition import PCA
-
+import numpy as np
 
 def mean_center(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
     """Mean center the data.
@@ -67,3 +67,21 @@ def pca(data: pd.DataFrame, track_names: list[str]) -> dict[str, pd.DataFrame]:
     pcas["pca3d"] = pd.concat([qual_data.reset_index(), num_data_3d], axis=1)
 
     return pcas
+
+# create gaussian kernel for smoothing
+def gaussian_kernel(window_size: int, sigma=1) -> np.ndarray:
+    """
+        Summary:
+        this function creates a gaussian kernel for back smoothing
+
+    Args:
+        window_size (int): how many frames to smooth over
+        sigma (int, optional): relative standard deviation. Defaults to 1.
+
+    Returns:
+        np.array: returns a kernel to smooth over with shape (window_size,)
+    """
+    x_vals = np.arange(window_size)
+    to_ret = np.exp(-((x_vals - window_size // 2) * 2) / (2 * sigma * 2))
+    to_ret[: window_size // 2] = 0
+    return to_ret

@@ -1,10 +1,9 @@
 from sleapyfaces.io import SLEAPanalysis, BehMetadata, VideoMetadata, DAQData
-from sleapyfaces.structs import FileConstructor, CustomColumn
-from sleapyfaces.normalize import pca, mean_center, z_score
+from sleapyfaces.utils.structs import FileConstructor, CustomColumn
+from sleapyfaces.utils.normalize import pca, mean_center, z_score
 import warnings
 import plotly.express as px
 import plotly.graph_objects as go
-
 from sleapyfaces.utils import into_trial_format, reduce_daq, flatten_list
 
 import pandas as pd

@@ -1,5 +1,5 @@
 from sleapyfaces.project import Project
-from sleapyfaces.normalize import mean_center
+from sleapyfaces.utils.normalize import mean_center
 import plotly.express as px
 import pandas as pd
 
