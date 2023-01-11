@@ -101,7 +101,9 @@ class SLEAPanalysis:
     path: str | PathLike[str]
     data: dict[str, np.ndarray | pd.DataFrame | list]
     tracks: pd.DataFrame
-    track_names: list
+    scores: pd.DataFrame
+    track_names: list[str]
+    nodes: list[str]
 
     def __init__(self, path: str | PathLike[str]):
         self.path = path
@@ -140,9 +142,11 @@ class SLEAPanalysis:
         if len(self.data.values()) == 0:
             raise ValueError("No data has been loaded.")
         else:
+            self.nodes = [name.replace(" ", "_") for name in self.data["node_names"]]
             self.tracks = tracks_deconstructor(
                 self.data["tracks"], self.data["node_names"]
             )
+            self.scores = pd.DataFrame(np.squeeze(self.data.get('point_scores')), columns=self.nodes)
 
     def getTrackNames(self) -> None:
         """gets the track names from the SLEAP analysis file

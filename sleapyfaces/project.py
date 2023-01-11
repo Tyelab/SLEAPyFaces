@@ -2,41 +2,43 @@ import os
 from sleapyfaces.structs import CustomColumn, File, FileConstructor
 from sleapyfaces.experiment import Experiment
 from sleapyfaces.normalize import mean_center, z_score, pca
-from dataclasses import dataclass
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 
 
 class Project:
     """Base class for project
 
     Args:
+        DAQFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the DAQ files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_events.csv", True) or ("DAQOutput.csv", False))
+        ExprMetaFile (str): a tuple with the first argument being the naming convention for the experimental structure files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_config.json", True) or ("BehMetadata.json", False))
+        SLEAPFile (str): a tuple with the first argument being the naming convention for the SLEAP files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_sleap.h5", True) or ("SLEAP.h5", False))
+        VideoFile (str): a tuple with the first argument being the naming convention for the video files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*.mp4", True) or ("video.avi", False))
         base (str): Base path of the project (e.g. "/specialk_cs/2p/raw/CSE009")
         iterator (dict[str, str]): Iterator for the project files, with keys as the label and values as the folder name (e.g. {"week 1": "20211105", "week 2": "20211112"})
-        DAQFile (str): The naming convention for the DAQ files (e.g. "*_events.csv" or "DAQOutput.csv")
-        ExprMetaFile (str): The naming convention for the experimental structure files (e.g. "*_config.json" or "BehMetadata.json")
-        SLEAPFile (str): The naming convention for the SLEAP files (e.g. "*_sleap.h5" or "SLEAP.h5")
-        VideoFile (str): The naming convention for the video files (e.g. "*.mp4" or "video.avi")
         glob (bool): Whether to use glob to find the files (e.g. True or False)
             NOTE: if glob is True, make sure to include the file extension in the naming convention
+        name (str): Name of the project (e.g. "CSE009")
 
     """
 
     def __init__(
         self,
-        DAQFile: str,
-        BehFile: str,
-        SLEAPFile: str,
-        VideoFile: str,
+        DAQFile: tuple[str, bool],
+        BehFile: tuple[str, bool],
+        SLEAPFile: tuple[str, bool],
+        VideoFile: tuple[str, bool],
         base: str,
         iterator: dict[str, str] = {},
-        get_glob: bool = False,
+        name: str = None,
     ):
         self.base = base
+        self.name = name
         self.DAQFile = DAQFile
         self.BehFile = BehFile
         self.SLEAPFile = SLEAPFile
         self.VideoFile = VideoFile
-        self.get_glob = get_glob
         if len(iterator.keys()) == 0:
             weeks = os.listdir(self.base)
             weeks = [
@@ -45,32 +47,30 @@ class Project:
             weeks.sort()
             for i, week in enumerate(weeks):
                 iterator[f"week {i+1}"] = week
-        self.iterator = iterator
-        self.exprs = [0] * len(self.iterator.keys())
-        self.files = [0] * len(self.iterator.keys())
-        for i, name in enumerate(list(self.iterator.keys())):
-            daq_file = File(
-                os.path.join(self.base, self.iterator[name]),
-                self.DAQFile,
-                self.get_glob,
-            )
-            sleap_file = File(
-                os.path.join(self.base, self.iterator[name]),
-                self.SLEAPFile,
-                self.get_glob,
-            )
-            beh_file = File(
-                os.path.join(self.base, self.iterator[name]),
-                self.BehFile,
-                self.get_glob,
-            )
-            video_file = File(
-                os.path.join(self.base, self.iterator[name]),
-                self.VideoFile,
-                self.get_glob,
-            )
-            self.files[i] = FileConstructor(daq_file, sleap_file, beh_file, video_file)
-            self.exprs[i] = Experiment(name, self.files[i])
+        self.exprs: dict[str, Experiment] = {}
+        self.files: list[str] = [os.path.join(base, path) for path in list(iterator.values())]
+        self.names: list[str] = list(iterator.keys())
+        for name, file in iterator.items():
+            self.exprs[name]: Experiment = Experiment(name, FileConstructor(File(
+                os.path.join(self.base, file),
+                self.DAQFile[0],
+                self.DAQFile[1],
+            ), File(
+                os.path.join(self.base, file),
+                self.SLEAPFile[0],
+                self.SLEAPFile[1],
+            ), File(
+                os.path.join(self.base, file),
+                self.BehFile[0],
+                self.BehFile[1],
+            ), File(
+                os.path.join(self.base, file),
+                self.VideoFile[0],
+                self.VideoFile[1],
+            )))
+        self.numeric_columns: list[str] = self.exprs[name].numeric_columns
+        self.all_data: pd.DataFrame = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
+        self.all_scores: pd.DataFrame = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
     def buildColumns(self, columns: list, values: list):
         """Builds the custom columns for the project and builds the data for each experiment
@@ -82,17 +82,13 @@ class Project:
         Initializes attributes:
             custom_columns (list[CustomColumn]): list of custom columns
             all_data (pd.DataFrame): the data for all experiments concatenated together
+            all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
-        self.custom_columns = [0] * len(columns)
-        for i in range(len(self.custom_columns)):
-            self.custom_columns[i] = CustomColumn(columns[i], values[i])
-        exprs_list = [0] * len(self.exprs)
-        names_list = [0] * len(self.exprs)
-        for i in range(len(self.exprs)):
-            self.exprs[i].buildData(self.custom_columns)
-            exprs_list[i] = self.exprs[i].sleap.tracks
-            names_list[i] = self.exprs[i].name
-        self.all_data = pd.concat(exprs_list, keys=names_list)
+        self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
+        for expr in self.exprs.values():
+            expr.buildData(self.custom_columns)
+        self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
+        self.all_scores = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
     def buildTrials(
         self,
@@ -112,49 +108,378 @@ class Project:
         Initializes attributes:
             exprs[i].trials (pd.DataFrame): the data frame containing the concatenated trial data for each experiment
             exprs[i].trialData (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
+            all_data (pd.DataFrame): the data for all experiments and trials concatenated together
+            all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
-        for i in range(len(self.exprs)):
-            self.exprs[i].buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        for expr in self.exprs.values():
+            expr.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
+        self.all_scores = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
-    def meanCenter(self):
+    def meanCenter(self, alldata: bool = False):
         """Recursively mean centers the data for each trial for each experiment
 
-        Initializes attributes:
+        Updates attributes:
             all_data (pd.DataFrame): the mean centered data for all trials and experiments concatenated together
         """
-        mean_all = [0] * len(self.exprs)
-        for i in range(len(self.exprs)):
-            mean_all[i] = [0] * len(self.exprs[i].trialData)
-            for j in range(len(self.exprs[i].trialData)):
-                mean_all[i][j] = mean_center(
-                    self.exprs[i].trialData[i], self.exprs[i].sleap.track_names
-                )
-            mean_all[i] = pd.concat(
-                mean_all[i],
-                axis=0,
-                keys=range(len(mean_all[i])),
-            )
-            mean_all[i] = mean_center(mean_all[i], self.exprs[i].sleap.track_names)
-        self.all_data = pd.concat(mean_all, keys=list(self.iterator.keys()))
+        if alldata:
+            self.all_data = mean_center(self.all_data, self.numeric_columns)
+        else:
+            for expr in self.exprs.values():
+                expr.meanCenter()
+            self.all_data = mean_center(
+                pd.concat(
+                    [
+                        expr.data for expr in self.exprs.values()
+                    ],
+                    keys=self.names
+                ),
+                self.numeric_columns)
 
-    def zScore(self):
+    def zScore(self, alldata: bool = False):
         """Z scores the mean centered data for each experiment
 
         Updates attributes:
             all_data (pd.DataFrame): the z-scored data for all experiments concatenated together
         """
-        self.all_data = z_score(self.all_data, self.exprs[0].sleap.track_names)
+        if alldata:
+            self.all_data = z_score(self.all_data, self.numeric_columns)
+        else:
+            for expr in self.exprs.values():
+                expr.zScore()
+            self.all_data = z_score(
+                pd.concat(
+                    [
+                        expr.data for expr in self.exprs.values()
+                    ],
+                    keys=self.names
+                ),
+                self.numeric_columns)
 
-    def analyze(self):
+    def normalize(self):
         """Runs the mean centering and z scoring functions
-        """
-        self.meanCenter()
-        self.zScore()
 
-    def visualize(self):
+        Updates attributes:
+            all_data (pd.DataFrame): the normaized data for all experiments concatenated together
+        """
+        for expr in self.exprs.values():
+                expr.normalize()
+        self.all_data = z_score(
+                pd.concat(
+                    [
+                        expr.data for expr in self.exprs.values()
+                    ],
+                    keys=self.names
+                ),
+                self.numeric_columns)
+
+    def runPCA(self):
         """Reduces `all_data` to 2 and 3 dimensions using PCA
 
         Initializes attributes:
             pcas (dict[str, pd.DataFrame]): a dictionary containing the 2 and 3 dimensional PCA data for each experiment (the keys are 'pca2d', 'pca3d')
         """
-        self.pcas = pca(self.all_data, self.exprs[0].sleap.track_names)
+        self.pcas = pca(self.data, self.numeric_columns)
+
+    def visualize(self, dimensions: int, filename: str = None, *args, **kwargs) -> go.Figure:
+        """Plots the data from the PCA
+
+        Args:
+            filename (str, optional): The filename to save the plot to. Defaults to None.
+        """
+        if dimensions == 2:
+            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color="Mouse")
+        elif dimensions == 3:
+            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
+        else:
+            raise ValueError("dimensions must be 2 or 3")
+        if filename is not None:
+            fig.write_image(filename, *args, **kwargs)
+        return fig
+
+    def save(self, filename: str | pd.HDFStore, title: str = None):
+        """Saves the project data to a HDF5 file
+
+        Args:
+            filename (str): The filename to save the data to
+        """
+        with pd.HDFStore(filename) as store:
+            if self.name is not None:
+                store.put(f"projects/{self.name}/data", self.data)
+                store.put(f"projects/{self.name}/scores", self.scores)
+            elif title is not None:
+                store.put(f"projects/{title}/data", self.data)
+                store.put(f"projects/{title}/scores", self.scores)
+            else:
+                store.put("all_data", self.data)
+                store.put("all_scores", self.scores)
+
+    def saveAll(self, filename: str, title: str = None):
+        """Saves all the data to a HDF5 file
+
+        Args:
+            filename (str): The filename to save the data to
+        """
+        for expr in self.exprs.values():
+            expr.saveTrials(filename)
+        with pd.HDFStore(filename) as store:
+            if self.name is not None:
+                store.put(f"projects/{self.name}/data", self.data)
+                store.put(f"projects/{self.name}/scores", self.scores)
+            elif title is not None:
+                store.put(f"projects/{title}/data", self.data)
+                store.put(f"projects/{title}/scores", self.scores)
+            else:
+                store.put("projects/all_data", self.data)
+                store.put("projects/all_scores", self.scores)
+
+    @property
+    def data(self) -> pd.DataFrame:
+        if len(self.all_data.index.levshape) == 3:
+            self.all_data.index.set_names(["Experiment", "Trial", "Trial_frame"], inplace=True)
+        elif len(self.all_data.index.levshape) == 1:
+            self.all_data.index.set_names(["Experiment"], inplace=True)
+
+        return self.all_data
+
+    @property
+    def scores(self) -> pd.DataFrame:
+        return self.all_scores
+
+    @property
+    def quant_cols(self) -> list[str]:
+        """Returns the quantitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the target quantitative data.
+        """
+        return self.numeric_columns
+
+    @property
+    def qual_cols(self) -> list[str]:
+        """Returns the qualitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the qualitative (or rather non-target) data.
+        """
+        cols = self.data.reset_index().columns.to_list()
+        cols = [i for i in cols if i not in self.quant_cols]
+        return cols
+
+    @property
+    def cols(self) -> tuple[list[str], list[str]]:
+        """Returns the target and non target columns of the data.
+
+        Returns:
+            tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
+        """
+        return (self.quant_cols, self.qual_cols)
+
+
+class Projects:
+    """Base class for multiple projects
+
+    Args:
+        DAQFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the DAQ files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_events.csv", True) or ("DAQOutput.csv", False))
+        ExprMetaFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the experimental structure files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_config.json", True) or ("BehMetadata.json", False))
+        SLEAPFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the SLEAP files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_sleap.h5", True) or ("SLEAP.h5", False))
+        VideoFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the video files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*.mp4", True) or ("video.avi", False))
+        base (str): the base folder for the project (e.g. "path/to/project")
+        projects_base (dict[str, str]): an iterative dictionary with the keys as the project name and the values as the folder name (e.g. {"Resilient 1": "CSE009", "Control 1": "CSC008"})
+        iterator (dict[str, str]): Iterator for the project files, with keys as the label and values as the folder name (e.g. {"week 1": "20211105", "week 2": "20211112"})
+        glob (bool): Whether to use glob to find the files (e.g. True or False)
+            NOTE: if glob is True, make sure to include the file extension in the naming convention
+        name (str): Name of the project (e.g. "CSE009")
+    """
+    def __init__(self,
+        DAQFile: tuple[str, bool],
+        BehFile: tuple[str, bool],
+        SLEAPFile: tuple[str, bool],
+        VideoFile: tuple[str, bool],
+        base: str,
+        projects_base: dict[str, str],
+        iterator: dict[str, str] = None) -> None:
+
+        """A class to handle multiple projects"""
+
+        self.names = list(projects_base.keys())
+        self.files = [os.path.join(base, path) for path in list(projects_base.values())]
+        self.projects: dict[str, Project] = {}
+        for name, file in projects_base.items():
+            self.projects[name] = Project(
+                DAQFile,
+                BehFile,
+                SLEAPFile,
+                VideoFile,
+                os.path.join(base, file),
+                iterator,
+                name
+            )
+        self.numeric_columns = self.projects[self.names[0]].numeric_columns
+        self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
+        self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
+
+    def buildColumns(self, columns: list, values: list):
+        """Builds the custom columns for each project and builds the data for each experiment
+
+        Args:
+            columns (list[str]): the column titles
+            values (list[any]): the data for each column
+
+        Updates attributes:
+            projects.custom_columns (list[CustomColumn]): list of custom columns
+            projects.all_data (pd.DataFrame): the data for all experiments concatenated together
+        """
+        for project in self.projects.values():
+            project.buildColumns(columns, values)
+        self.custom_columns = self.projects[self.names[0]].custom_columns
+        self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
+        self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
+
+
+    def buildTrials(
+        self,
+        TrackedData: list[str],
+        Reduced: list[bool],
+        start_buffer: int = 10000,
+        end_buffer: int = 13000,
+    ):
+        """Parses the data from each experiment into its individual trials
+
+        Args:
+            TrackedData (list[str]): The title of the columns from the DAQ data to be tracked
+            Reduced (list[bool]): The corresponding boolean for whether the DAQ data is to be reduced (`True`) or not (`False`)
+            start_buffer (int, optional): The time in milliseconds before the trial start to capture. Defaults to 10000.
+            end_buffer (int, optional): The time in milliseconds after the trial start to capture. Defaults to 13000.
+
+        Initializes attributes:
+            projects[name].exprs[exprName].trials (pd.DataFrame): the data frame containing the concatenated trial data for each experiment
+            projects[name].exprs[exprName].trialData (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
+        """
+        for project in self.projects.values():
+            project.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
+        self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
+
+    def meanCenter(self, alldata: bool = False):
+        if alldata:
+            self.all_data = mean_center(self.all_data, self.numeric_columns)
+        else:
+            for project in self.projects.values():
+                project.meanCenter()
+            self.all_data = mean_center(
+                pd.concat(
+                    [
+                        project.all_data
+                        for project in self.projects.values()
+                    ], keys=self.names
+                ), self.numeric_columns)
+
+    def zScore(self, alldata: bool = False):
+        if alldata:
+            self.all_data = z_score(self.all_data, self.numeric_columns)
+        else:
+            for project in self.projects.values():
+                project.zScore()
+            self.all_data = z_score(
+                pd.concat(
+                    [
+                        project.all_data
+                        for project in self.projects.values()
+                    ], keys=self.names
+                ), self.numeric_columns)
+
+    def normalize(self):
+        for project in self.projects.values():
+            project.normalize()
+        self.all_data = z_score(
+            pd.concat(
+                    [
+                        project.all_data
+                        for project in self.projects.values()
+                    ], keys=self.names
+                ),
+            self.numeric_columns
+        )
+
+    def runPCA(self):
+        self.pcas = pca(self.all_data, self.numeric_columns)
+
+    def visualize(self, dimensions: int, filename=None, *args, **kwargs) -> go.Figure:
+        """Plots the data from the PCA
+
+        Args:
+            filename (str, optional): The filename to save the plot to. Defaults to None.
+        """
+        if dimensions == 2:
+            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color="Mouse")
+        elif dimensions == 3:
+            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
+        else:
+            raise ValueError("dimensions must be 2 or 3")
+        if filename is not None:
+            fig.write_image(filename, *args, **kwargs)
+        return fig
+
+    def save(self, filename: str, title: str = None):
+        """Saves projects data to a HDF5 file
+
+        Args:
+            filename (str): The filename to save the data to
+        """
+        with pd.HDFStore(filename) as store:
+            if title is not None:
+                store.put(f"{title}/all_data", self.all_data)
+            else:
+                store.put("all_data", self.all_data)
+
+    def saveAll(self, filename: str, title: str = None):
+        """Saves all the data to a HDF5 file
+
+        Args:
+            filename (str): The filename to save the data to
+        """
+        for name in self.names:
+            self.projects[name].saveAll(filename)
+        with pd.HDFStore(filename) as store:
+            if title is not None:
+                store.put(f"{title}/all_data", self.all_data)
+            else:
+                store.put("all_data", self.all_data)
+
+    @property
+    def data(self) -> pd.DataFrame:
+        return self.all_data
+
+    @property
+    def scores(self) -> pd.DataFrame:
+        return self.all_scores
+
+    @property
+    def quant_cols(self) -> list[str]:
+        """Returns the quantitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the target quantitative data.
+        """
+        return self.numeric_columns
+
+    @property
+    def qual_cols(self) -> list[str]:
+        """Returns the qualitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the qualitative (or rather non-target) data.
+        """
+        cols = self.data.reset_index().columns.to_list()
+        cols = [i for i in cols if i not in self.quant_cols]
+        return cols
+
+    @property
+    def cols(self) -> tuple[list[str], list[str]]:
+        """Returns the target and non target columns of the data.
+
+        Returns:
+            tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
+        """
+        return self.quant_cols, self.qual_cols

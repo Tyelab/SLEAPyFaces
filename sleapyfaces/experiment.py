@@ -1,12 +1,14 @@
-from dataclasses import dataclass
 from sleapyfaces.io import SLEAPanalysis, BehMetadata, VideoMetadata, DAQData
 from sleapyfaces.structs import FileConstructor, CustomColumn
+from sleapyfaces.normalize import pca, mean_center, z_score
+import warnings
+import plotly.express as px
+import plotly.graph_objects as go
 
 from sleapyfaces.utils import into_trial_format, reduce_daq, flatten_list
 
 import pandas as pd
 import numpy as np
-
 
 class Experiment:
     """Class constructor for the Experiment object.
@@ -68,7 +70,7 @@ class Experiment:
             self.custom_columns[len(CustomColumns) :], axis=0
         )
         self.custom_columns[len(CustomColumns)].reset_index(inplace=True)
-        self.custom_columns = pd.concat(
+        self.custom_columns: pd.DataFrame = pd.concat(
             self.custom_columns[: (len(CustomColumns) + 1)], axis=1
         )
         self.sleap.append(self.custom_columns.loc[:, col_names])
@@ -169,7 +171,169 @@ class Experiment:
             start_indecies,
             end_indecies,
         )
+        self.trialScores = into_trial_format(
+            self.scores,
+            self.beh.cache.loc[:, "trialArray"],
+            start_indecies,
+            end_indecies,
+        )
         self.trialData = [i for i in self.trialData if type(i) is pd.DataFrame]
+        self.trialScores = [i for i in self.trialScores if type(i) is pd.DataFrame]
+        if len(self.trialData) != len(self.trialScores):
+            warnings.warn(
+                "The number of trial dataframes does not match the number of trial score dataframes.", RuntimeWarning
+            )
         self.trials = pd.concat(
             self.trialData, axis=0, keys=[i for i in range(len(self.trialData))]
         )
+        self.scoredTrials = pd.concat(
+            self.trialScores, axis=0, keys=[i for i in range(len(self.trialScores))]
+        )
+
+    def saveTrials(self, filename, *args):
+        """Saves the trial data to a csv file.
+
+        Args:
+            filename (str): the file to save the HDF5 data to.
+        """
+        with pd.HDFStore(filename) as store:
+            store.put("trials", self.trials, format="table", data_columns=True)
+            for i, trial in enumerate(self.trialData):
+                store.put(f"trialData/trial{i}", trial, format="table", data_columns=True)
+
+    def meanCenter(self, alldata: bool = False):
+        """Recursively mean centers the data for each trial for each experiment
+
+        Updates attributes:
+            all_data (pd.DataFrame): the mean centered data for all trials and experiments concatenated together
+        """
+        if alldata:
+            self.all_data = mean_center(self.all_data, self.numeric_columns)
+        else:
+            self.all_data = mean_center(
+                            pd.concat(
+                                [
+                                    mean_center(
+                                        self.trialData[i], self.numeric_columns
+                                    ) for i in range(len(self.trialData))
+                                ],
+                                axis=0,
+                                keys=range(len(self.trialData)),
+                            ),
+                            self.numeric_columns
+                        )
+
+    def zScore(self, alldata: bool = False):
+        """Z scores the mean centered data for each experiment
+
+        Updates attributes:
+            all_data (pd.DataFrame): the z-scored data for all experiments concatenated together
+        """
+        if alldata:
+            self.all_data = z_score(self.all_data, self.numeric_columns)
+        else:
+            self.all_data = z_score(
+                            pd.concat(
+                                [
+                                    z_score(
+                                        self.trialData[i], self.numeric_columns
+                                    ) for i in range(len(self.trialData))
+                                ],
+                                axis=0,
+                                keys=range(len(self.trialData)),
+                            ),
+                            self.numeric_columns
+                        )
+
+    def normalize(self):
+        """Runs the mean centering and z scoring functions
+
+        Updates attributes:
+            all_data (pd.DataFrame): the normaized data for all experiments concatenated together
+        """
+        self.all_data = z_score(
+                            pd.concat(
+                                [
+                                    mean_center(
+                                        self.trialData[i], self.numeric_columns
+                                    ) for i in range(len(self.trialData))
+                                ],
+                                axis=0,
+                                keys=range(len(self.trialData)),
+                            ),
+                            self.numeric_columns
+                        )
+
+    def runPCA(self):
+        self.pcas = pca(self.all_data, self.numeric_columns)
+
+    def visualize(self, dimensions: int, filename=None, *args, **kwargs) -> go.Figure:
+        """Plots the data from the PCA
+
+        Args:
+            filename (str, optional): The filename to save the plot to. Defaults to None.
+        """
+        if dimensions == 2:
+            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color="Mouse")
+        elif dimensions == 3:
+            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
+        else:
+            raise ValueError("dimensions must be 2 or 3")
+        if filename is not None:
+            fig.write_image(filename, *args, **kwargs)
+        return fig
+
+    @property
+    def data(self) -> pd.DataFrame:
+        """Returns the latest iteration of the data.
+
+        Returns:
+            pd.DataFrame: the complete dataset.
+        """
+        if hasattr(self, "all_data"):
+            return self.all_data
+        elif hasattr(self, "trials"):
+            return self.trials
+        else:
+            return self.sleap.tracks
+
+    @property
+    def quant_cols(self) -> list[str]:
+        """Returns the quantitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the target quantitative data.
+        """
+        return self.numeric_columns
+
+    @property
+    def qual_cols(self) -> list[str]:
+        """Returns the qualitative columns of the data.
+
+        Returns:
+            list[str]: the columns from the data with the qualitative (or rather non-target) data.
+        """
+        cols = self.data.copy().reset_index().columns.to_list()
+        cols = [i for i in cols if i not in self.quant_cols]
+        return cols
+
+    @property
+    def cols(self) -> tuple[list[str], list[str]]:
+        """Returns the target and non target columns of the data.
+
+        Returns:
+            tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
+        """
+        return self.quant_cols, self.qual_cols
+
+    @property
+    def scores(self) -> pd.DataFrame:
+        """Returns the pandas DataFrame of the predicted tracking scores.
+
+        Returns:
+            pd.DataFrame: the pandas DataFrame of tracking scores.
+        """
+        if hasattr(self, "scoredTrials"):
+            return self.scoredTrials
+        else:
+            return self.sleap.scores

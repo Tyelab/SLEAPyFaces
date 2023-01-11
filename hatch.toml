@@ -34,6 +34,10 @@ dependencies = [
     "h5py",
     "python-rapidjson",
     "matplotlib",
+    "statsmodels",
+    "seaborn",
+    "geomstats",
+	"plotly"
 ]
 
 [envs.default.scripts]
