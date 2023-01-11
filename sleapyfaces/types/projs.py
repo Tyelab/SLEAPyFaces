@@ -37,23 +37,17 @@ class Projects:
         self.names = list(projects_base.keys())
         self.files = [os.path.join(self.base_path, path) for path in list(self.base_project.values())]
         self.projects: dict[str, Project] = {}
-        print()
         print("=========================================")
-        print()
         print(tabs, "Initializing Projects...")
-        print()
         print("------------------------------------------")
         print(tabs+"\t", "Base path:", self.base_path)
         print(tabs+"\t", "Projects:", self.base_project)
-        print()
         print(tabs+"\t", "Transforming to:")
         print("------------------------------------------")
         print(tabs+"\t\t", "Project keys (names):", self.names)
         print(tabs+"\t\t", "Project files (paths):", self.files)
         print("------------------------------------------")
-        print()
         print("=========================================")
-        print()
         self.tabs = tabs
         for name, file in self.base_project.items():
             self.projects[name] = Project(

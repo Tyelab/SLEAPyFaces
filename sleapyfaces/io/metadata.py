@@ -107,7 +107,6 @@ class VideoMetadata:
         self.fps = float(eval(self.cache.get("avg_frame_rate")))
         print(tabs, "Video metadata loaded.")
         print(tabs + "\t", f"Average FPS: {self.fps}")
-        print()
 
     def saveData(self, filename: str | PathLike[str] | FileIO) -> None:
         """Saves the video metadata to a json file.

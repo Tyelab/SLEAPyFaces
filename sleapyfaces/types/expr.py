@@ -28,12 +28,10 @@ class Experiment:
     def __init__(self, name: str, files: FileConstructor, tabs: str = ""):
         self.name = name
         self.files = files
-        print()
         print("=========================================")
         print(tabs, "Initializing Experiment...")
         print(tabs + "\t", "Path:", self.files.sleap.basepath)
         print("=========================================")
-        print()
         self.tabs = tabs
         self.sleap = SLEAPanalysis(self.files.sleap.file, tabs=tabs + "\t")
         self.beh = BehMetadata(self.files.beh.file, tabs=tabs + "\t")

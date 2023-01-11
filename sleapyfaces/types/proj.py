@@ -36,12 +36,10 @@ class Project:
 
         self.base = base
         self.name = name
-        print()
         print("=========================================")
         print(tabs, "Initializing Project...", self.name)
         print(tabs + "\t", "Path:", self.base)
         print("=========================================")
-        print()
         self.prefix = expr_prefix
         self.DAQFile = DAQFile
         self.BehFile = BehFile

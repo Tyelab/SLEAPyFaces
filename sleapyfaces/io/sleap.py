@@ -49,7 +49,6 @@ class SLEAPanalysis:
         self.getTrackNames()
         print(tabs, "SLEAP analysis loaded.")
         print(tabs + "\t", f"Tracks: {self.track_names}")
-        print()
 
     def getDatasets(
         self,

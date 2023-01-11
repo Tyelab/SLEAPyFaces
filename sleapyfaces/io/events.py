@@ -29,7 +29,6 @@ class DAQData:
         self.columns = self.cache.columns.to_list()[1:]
         print(tabs, "DAQ data loaded.")
         print(tabs + "\t", f"Columns: {self.columns}")
-        print()
 
     def append(self, name: str, value: list) -> None:
         """takes in a list with a name and appends it to the cache as a column
