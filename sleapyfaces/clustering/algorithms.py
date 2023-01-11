@@ -1,8 +1,10 @@
+from math import sqrt
 from typing import Protocol
+
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from math import sqrt
+
 
 class dataobjectprotocol(Protocol):
     data: pd.DataFrame
@@ -37,8 +39,8 @@ class Cluster:
             self.clusterData, self.data.loc[:, ("Classes", self.pred)], test_size=0.3, random_state=12345
         )
         if pipeline:
-            from sklearn.preprocessing import MaxAbsScaler
             from sklearn.decomposition import PCA
+            from sklearn.preprocessing import MaxAbsScaler
 
             self.pipeline = [
                 ('scaler', MaxAbsScaler()),
@@ -202,8 +204,8 @@ class Cluster:
             return bir
 
     def OutlierSVM(self, output: bool = False,  *args, **kwargs):
-        from sklearn.svm import OneClassSVM
         from sklearn.metrics import silhouette_score
+        from sklearn.svm import OneClassSVM
 
         print("\t One Class SVM anomaly detection...")
         if "n_clusters" in kwargs or len(args) != 0:
@@ -231,10 +233,10 @@ class Cluster:
             return svm
 
     def knn(self, n_neighbors: int | list[int], output: bool = False):
-        from sklearn.neighbors import KNeighborsRegressor
+        from sklearn.ensemble import BaggingRegressor
         from sklearn.metrics import mean_squared_error
         from sklearn.model_selection import GridSearchCV
-        from sklearn.ensemble import BaggingRegressor
+        from sklearn.neighbors import KNeighborsRegressor
 
         if isinstance(n_neighbors, int):
             knn_model = KNeighborsRegressor(n_neighbors=n_neighbors)

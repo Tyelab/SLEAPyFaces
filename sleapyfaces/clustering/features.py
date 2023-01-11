@@ -1,8 +1,11 @@
-import pandas as pd
-import numpy as np
 from dataclasses import dataclass
 from typing import Protocol
+
+import numpy as np
+import pandas as pd
+
 from sleapyfaces.utils.graph import cartesian_to_polar, euclidean_distance
+
 
 class dataobjectprotocol(Protocol):
     data: pd.DataFrame

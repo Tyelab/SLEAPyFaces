@@ -1,9 +1,12 @@
 import os
-from sleapyfaces.types.proj import Project
-from sleapyfaces.utils.normalize import mean_center, z_score, pca
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+
+from sleapyfaces.types.proj import Project
+from sleapyfaces.utils.normalize import mean_center, pca, z_score
+
 
 class Projects:
     """Base class for multiple projects
@@ -64,7 +67,7 @@ class Projects:
         self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
         self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
 
-    def buildColumns(self, columns: list, values: list):
+    def buildColumns(self, columns: list = None, values: list = None):
         """Builds the custom columns for each project and builds the data for each experiment
 
         Args:
@@ -77,14 +80,16 @@ class Projects:
         """
         self.custom_columns = []
         print(self.tabs, "Building columns...")
-        if len(columns) != len(values):
-            raise ValueError("The number of columns and values must be equal")
-        if len(columns) != 0:
+        if columns is None:
+            if not hasattr(self.projects[self.names[0]], "custom_columns"):
+                for project in self.projects.values():
+                    project.buildColumns()
+        elif len(columns) != len(values):
+                raise ValueError("The number of columns and values must be equal")
+        else:
             for project in self.projects.values():
                 project.buildColumns(columns, values)
-            self.custom_columns = self.projects[self.names[0]].custom_columns
-        else:
-            self.custom_columns = self.projects[self.names[0]].custom_columns
+        self.custom_columns = self.projects[self.names[0]].custom_columns
         self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
         self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
 

@@ -1,13 +1,15 @@
-from sleapyfaces.io import SLEAPanalysis, BehMetadata, VideoMetadata, DAQData
-from sleapyfaces.utils.structs import FileConstructor, CustomColumn
-from sleapyfaces.utils.normalize import pca, mean_center, z_score
 import warnings
+
+import numpy as np
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from sleapyfaces.utils import into_trial_format, reduce_daq, flatten_list
 
-import pandas as pd
-import numpy as np
+from sleapyfaces.io import BehMetadata, DAQData, SLEAPanalysis, VideoMetadata
+from sleapyfaces.utils import flatten_list, into_trial_format, reduce_daq
+from sleapyfaces.utils.normalize import mean_center, pca, z_score
+from sleapyfaces.utils.structs import CustomColumn, FileConstructor
+
 
 class Experiment:
     """Class constructor for the Experiment object.
@@ -39,7 +41,7 @@ class Experiment:
         self.daq = DAQData(self.files.daq.file, tabs=tabs + "\t")
         self.numeric_columns = self.sleap.track_names
 
-    def buildData(self, CustomColumns: list[CustomColumn]):
+    def buildData(self, CustomColumns: list[CustomColumn] = None):
         """Builds the data for the experiment.
 
         Args:
@@ -56,6 +58,8 @@ class Experiment:
             custom_columns (pd.DataFrame): The non-numeric columns.
         """
         print(self.tabs, "Building columns for experiment:", self.name)
+        if CustomColumns is None:
+            CustomColumns = []
         self.custom_columns = [0] * (len(self.sleap.tracks.index) + len(CustomColumns))
         col_names = [0] * (len(CustomColumns) + 2)
         for i, col in enumerate(CustomColumns):

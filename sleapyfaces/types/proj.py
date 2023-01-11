@@ -1,10 +1,12 @@
 import os
-from sleapyfaces.utils.structs import CustomColumn, File, FileConstructor
-from sleapyfaces.types.expr import Experiment
-from sleapyfaces.utils.normalize import mean_center, z_score, pca
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+
+from sleapyfaces.types.expr import Experiment
+from sleapyfaces.utils.normalize import mean_center, pca, z_score
+from sleapyfaces.utils.structs import CustomColumn, File, FileConstructor
 
 
 class Project:
@@ -81,7 +83,7 @@ class Project:
         self.all_data: pd.DataFrame = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
         self.all_scores: pd.DataFrame = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
-    def buildColumns(self, columns: list, values: list):
+    def buildColumns(self, columns: list = None, values: list = None):
         """Builds the custom columns for the project and builds the data for each experiment
 
         Args:
@@ -94,10 +96,18 @@ class Project:
             all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
         print(self.tabs, "Building custom columns:")
-        print(self.tabs, [(col, val) for col, val in zip(columns, values)])
-        self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
-        for expr in self.exprs.values():
-            expr.buildData(self.custom_columns)
+        if columns is None:
+            if not hasattr(self.exprs[self.names[0]], "custom_columns"):
+                for expr in self.exprs.values():
+                    expr.buildData()
+        elif len(columns) != len(values):
+            raise ValueError("Number of columns and values must be equal")
+        else:
+            print(self.tabs, [(col, val) for col, val in zip(columns, values)])
+            self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
+            for expr in self.exprs.values():
+                expr.buildData(self.custom_columns)
+        self.custom_columns = self.exprs[self.names[0]].custom_columns
         self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
         self.all_scores = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
 
