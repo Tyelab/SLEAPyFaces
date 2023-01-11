@@ -75,10 +75,16 @@ class Projects:
             projects.custom_columns (list[CustomColumn]): list of custom columns
             projects.all_data (pd.DataFrame): the data for all experiments concatenated together
         """
+        self.custom_columns = []
         print(self.tabs, "Building columns...")
-        for project in self.projects.values():
-            project.buildColumns(columns, values)
-        self.custom_columns = self.projects[self.names[0]].custom_columns
+        if len(columns) != len(values):
+            raise ValueError("The number of columns and values must be equal")
+        if len(columns) != 0:
+            for project in self.projects.values():
+                project.buildColumns(columns, values)
+            self.custom_columns = self.projects[self.names[0]].custom_columns
+        else:
+            self.custom_columns = self.projects[self.names[0]].custom_columns
         self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
         self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
 
