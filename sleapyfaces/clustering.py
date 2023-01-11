@@ -1,4 +1,3 @@
-from cProfile import label
 from typing import Protocol
 import pandas as pd
 from dataclasses import dataclass

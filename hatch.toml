@@ -36,7 +36,8 @@ dependencies = [
     "matplotlib",
     "statsmodels",
     "seaborn",
-    "geomstats"
+    "geomstats",
+	"plotly"
 ]
 
 [envs.default.scripts]

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 from .__about__ import *
 
-from sleapyfaces.project import Project
+from sleapyfaces.project import Project, Projects
 from sleapyfaces.experiment import Experiment
 from sleapyfaces.io import SLEAPanalysis, DAQData, BehMetadata, VideoMetadata
 from sleapyfaces.structs import File, FileConstructor, CustomColumn
@@ -20,3 +20,4 @@ from sleapyfaces.utils import (
     gaussian_kernel,
     reduce_daq,
 )
+from sleapyfaces.clustering import FeatureExtractor, Cluster
