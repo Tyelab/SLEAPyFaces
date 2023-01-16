@@ -35,6 +35,7 @@ class Cluster:
         array, _ = self.data.columns.get_loc_level("Classes")
         self.numCols = np.invert(array)
         self.clusterData = self.data.loc[:, self.numCols]
+        self.predData = self.data.loc[:, ("Classes", self.pred)]
         self.trainData, self.testData, self.trainLabels, self.testLabels = train_test_split(
             self.clusterData, self.data.loc[:, ("Classes", self.pred)], test_size=0.3, random_state=12345
         )

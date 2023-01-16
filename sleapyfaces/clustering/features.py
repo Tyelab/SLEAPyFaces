@@ -75,7 +75,6 @@ class FeatureExtractor:
         centroid_cols: list[str] = centroids.columns.to_list()
         if topolar:
             centroids = cartesian_to_polar(centroids, centroid_cols)
-        self.calcData = pd.concat([self.calcData, centroids], axis=1)
         return centroids if not inplace else None
 
     def extractCentroid(self, feature: str, inplace: bool = False, topolar: bool = False, multiindex: bool = True) -> pd.DataFrame | None:
@@ -101,7 +100,7 @@ class FeatureExtractor:
             raise ValueError(f"Point {pointa} or {pointb} not found")
         self.calcsLog.append(f"twoPointsDist(pointa={pointa}, pointb={pointb}, inplace={inplace})")
         distance = euclidean_distance(self.cartesian.loc[:, [f"{pointa}_x", f"{pointa}_y"]], self.cartesian.loc[:, [f"{pointb}_x", f"{pointb}_y"]], multiindex=True)
-        self.calcData = pd.concat([self.calcData, distance], axis=1)
+        self.calcData = self.calcData.join(distance)
         return distance if not inplace else None
 
     def distToCentroid(self, point: str, centroid: str, inplace: bool = False) -> pd.DataFrame | None:
@@ -113,7 +112,7 @@ class FeatureExtractor:
         self.calcsLog.append(f"distToCentroid(point={point}, centroid={centroid}, inplace={inplace})")
         centroid = self.extractCentroid(centroid, multiindex=False)
         distance = euclidean_distance(self.cartesian.loc[:, [f"{point}_x", f"{point}_y"]], centroid, multiindex=True)
-        self.calcData = pd.concat([self.calcData, distance], axis=1)
+        self.calcData = self.calcData.join(distance)
         return distance if not inplace else None
 
     def twoCentroidsDist(self, centroida: str, centroidb: str, inplace: bool = False) -> pd.DataFrame | None:
@@ -126,7 +125,7 @@ class FeatureExtractor:
         centroida = self.extractCentroid(centroida, multiindex=False)
         centroidb = self.extractCentroid(centroidb, multiindex=False)
         distance = euclidean_distance(centroida, centroidb, multiindex=True)
-        self.calcData = pd.concat([self.calcData, distance], axis=1)
+        self.calcData = self.calcData.join(distance)
         return distance if not inplace else None
 
     def pointAngle(self, point: str, inplace: bool = False) -> pd.DataFrame | None:
@@ -155,7 +154,6 @@ class FeatureExtractor:
             vel[i].iloc[0] = vel[i].iloc[1]
         velocities: pd.DataFrame = pd.concat(vel, axis=1, keys=self.points)
         velocities.columns = pd.MultiIndex.from_product([list(self.points), ["velocity"]])
-        self.calcData = pd.concat([self.calcData, velocities], axis=1)
         return velocities if not inplace else None
 
     def velocity(self, point: str, inplace: bool = False) -> pd.DataFrame | None:
@@ -173,12 +171,22 @@ class FeatureExtractor:
         return flatScores
 
     @property
-    def extract(self) -> pd.DataFrame:
-        self.extractCentroids(inplace=True)
-        self.extractCentroids(inplace=True, topolar=True)
-        self.velocities(inplace=True)
-        data = pd.concat([self.data, self.calcData], axis=1)
-        return data.loc[:,~data.columns.duplicated()].copy()
+    def all(self) -> pd.DataFrame:
+        print("Extracting calculations")
+        df = self.calcData
+        print("Extracting centroids")
+        centroids = self.extractCentroids()
+        if centroids is None:
+            raise ValueError("No centroids found")
+        df = df.join(centroids)
+        print("Converting centroids to polar coordinate")
+        centroids = cartesian_to_polar(centroids, centroids.columns.to_list())
+        df = df.join(centroids)
+        del centroids
+        print("Extracting velocities")
+        df = df.join(self.velocities())
+        print("Adding point data")
+        return self.data.merge(df)
 
     @property
     def extractManifold(self) -> pd.DataFrame:
