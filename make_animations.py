@@ -10,6 +10,8 @@ if __name__ == '__main__':
     #spawn is critical to not share plt across threads.
     with open(os.path.join(os.getcwd(), ".ignore/all_data.pickle"), "rb") as f:
         features = pickle.load(f)
+
+    weeks = features[("Classes", "Week")].unique().tolist()
     mp.set_start_method('spawn')
     with Pool() as p:
         weeks = features[("Classes", "Week")].unique().tolist()

@@ -20,15 +20,22 @@ class dataobjectprotocol(Protocol):
     basefeats: list[str]
 
     @property
-    def extract(self) -> pd.DataFrame:
+    def all_data(self) -> pd.DataFrame:
         pass
 
 class Cluster:
+    """BETA: Clustering algorithm class
+
+    Args:
+        data (dataobjectprotocol): data object
+        prediction_column (str): the prediction class (from FeatureExtractor.classes)
+        pipeline (bool, optional): whether to use a sklearn pipeline. Defaults to False.
+    """
     def __init__(self, data: dataobjectprotocol, prediction_column: str, pipeline: bool = False):
         from sklearn.model_selection import train_test_split
 
         print("Clustering...")
-        self.data = data.extract
+        self.data = data.all_data
         self.cols = data.cols
         self.pred = prediction_column
         self.pipeline = None

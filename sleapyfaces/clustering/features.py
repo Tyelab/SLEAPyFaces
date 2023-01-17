@@ -16,6 +16,28 @@ class dataobjectprotocol(Protocol):
 
 @dataclass(slots=True)
 class FeatureExtractor:
+    """Summary:
+        A functional class for extracting features from the data output from one of the base types of data objects. (i.e. sleapyfaces.types... Projects, Project, or Experiment)
+
+    Args:
+        dataObject (sleapyfaces.types.Projects | sleapyfaces.types.Project | sleapyfaces.types.Experiment): The data object from which to extract features.
+        base_features (list[str]): A list of base features to build centroids of (i.e. ['nose', 'eye', 'ear'])
+
+    Attributes:
+        data (pd.DataFrame): The combined cartesian and polar data from the data object.
+        cols (list[str]): The list of columns in the data attribute (good for quickly building an iterator). (e.g. ['upper_nose_x', 'upper_nose_y', 'upper_nose_r', 'upper_nose_theta', ...])
+        points (list[str]): The list of facial points from which the data is extracted (good for quickly building an iterator). (e.g. ['upper_nose', 'lower_nose', 'upper_ear', 'lower_ear', ...])
+        classes (list[str]): A list of the identity classes in the data object. (e.g. ['Weeks', 'Mouse', 'Trial', 'Trial_index', ...])
+        basefeats (list[str]): The list of base features to build centroids of (i.e. ['nose', 'eye', 'ear'])
+        cartesian (pd.DataFrame): The cartesian data from the data object.
+        cartesianCols (list[str]): The list of columns in the cartesian attribute (good for quickly building an iterator). (e.g. ['upper_nose_x', 'upper_nose_y', 'upper_ear_x', 'upper_ear_y', ...])
+        polar (pd.DataFrame): The polar data from the data object.
+        polarCols (list[str]): The list of columns in the polar attribute (good for quickly building an iterator). (e.g. ['upper_nose_r', 'upper_nose_theta', 'upper_ear_r', 'upper_ear_theta', ...])
+        scores (pd.DataFrame): The SLEAP tracking scores from the data object. (good for weighting the data in classifiers)
+        calcData (pd.DataFrame): A dataframe of the extracted features (thus far).
+        calcsLog (list[str]): A log of the calculations performed on the data.
+        all_data (pd.DataFrame): A dataframe of all of the extracted features (including the original data) with validation checks in place.
+    """
 
     data: pd.DataFrame
     cartesian: pd.DataFrame
@@ -63,6 +85,15 @@ class FeatureExtractor:
         self.scores = dataObject.scores
 
     def extractCentroids(self, inplace: bool = False, topolar: bool = False) -> pd.DataFrame | None:
+        """Extracts all the centroids of the base features.
+
+        Args:
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+            topolar (bool, optional): whether to convert the output to polar coordinates. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         if self.basefeats is None:
             raise ValueError("No base features have been defined.")
         self.calcsLog.append(f"extractCentroids(inplace={inplace}, topolar={topolar})")
@@ -72,12 +103,22 @@ class FeatureExtractor:
                 df_coord: pd.Series = self.cartesian.loc[:, self.cartesianCols].filter(like=feature).filter(like=coord).apply(np.mean, axis=1)
                 df_coords.append(df_coord.rename((feature, coord)))
         centroids: pd.DataFrame = pd.concat(df_coords, axis=1)
-        centroid_cols: list[str] = centroids.columns.to_list()
         if topolar:
-            centroids = cartesian_to_polar(centroids, centroid_cols)
-        return centroids if not inplace else None
+            centroids = cartesian_to_polar(centroids, centroids.columns.to_list())
+        return centroids if not inplace else self.calcData.join(centroids, how="outer", inplace=True)
 
     def extractCentroid(self, feature: str, inplace: bool = False, topolar: bool = False, multiindex: bool = True) -> pd.DataFrame | None:
+        """Extracts a centroid from the base features.
+
+        Args:
+            feature (str): the feature to extract the centroid from. Must be a base feature (see basefeats attribute).
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+            topolar (bool, optional): whether to convert the output to polar coordinates. Defaults to False.
+            multiindex (bool, optional): whether to use a multiindex for the output. Defaults to True.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         if feature not in self.basefeats:
             raise ValueError(f"Centroid {feature} not found")
         self.calcsLog.append(f"extractCentroid(feature={feature}, inplace={inplace}, topolar={topolar})")
@@ -89,21 +130,39 @@ class FeatureExtractor:
             else:
                 df_coords.append(df_coord.rename(f"{feature}_{coord}"))
         centroid: pd.DataFrame = pd.concat(df_coords, axis=1)
-        centroid_col: list = centroid.columns.to_list()
         if topolar:
-            centroid = cartesian_to_polar(centroid, centroid_col)
-        return centroid if not inplace else None
+            centroid = cartesian_to_polar(centroid, centroid.columns.to_list())
+        return centroid if not inplace else self.calcData.join(centroid, how="outer", inplace=True)
 
     def twoPointsDist(self, pointa: str, pointb: str, inplace: bool = False) -> pd.DataFrame | None:
+        """Extracts the euclidean distance between two points.
+
+        Args:
+            pointa (str): the start point. Must be an original point (see points attribute).
+            pointb (str): the end point. Must be an original point (see points attribute).
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         print("\t Extracting distance between points:", pointa, "and", pointb)
         if pointa not in self.points or pointb not in self.points:
             raise ValueError(f"Point {pointa} or {pointb} not found")
         self.calcsLog.append(f"twoPointsDist(pointa={pointa}, pointb={pointb}, inplace={inplace})")
         distance = euclidean_distance(self.cartesian.loc[:, [f"{pointa}_x", f"{pointa}_y"]], self.cartesian.loc[:, [f"{pointb}_x", f"{pointb}_y"]], multiindex=True)
-        self.calcData = self.calcData.join(distance)
-        return distance if not inplace else None
+        return distance if not inplace else self.calcData.join(distance, how="outer", inplace=True)
 
     def distToCentroid(self, point: str, centroid: str, inplace: bool = False) -> pd.DataFrame | None:
+        """Extracts the euclidean distance between a point and a centroid.
+
+        Args:
+            point (str): the point. Must be an original point (see points attribute).
+            centroid (str): the centroid. Must be a base feature (see basefeats attribute).
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         print("\t Extracting distance between point and centroid:", point, "and", centroid)
         if centroid not in self.basefeats:
             raise ValueError(f"Centroid {centroid} not found")
@@ -112,10 +171,19 @@ class FeatureExtractor:
         self.calcsLog.append(f"distToCentroid(point={point}, centroid={centroid}, inplace={inplace})")
         centroid = self.extractCentroid(centroid, multiindex=False)
         distance = euclidean_distance(self.cartesian.loc[:, [f"{point}_x", f"{point}_y"]], centroid, multiindex=True)
-        self.calcData = self.calcData.join(distance)
-        return distance if not inplace else None
+        return distance if not inplace else self.calcData.join(distance, how="outer", inplace=True)
 
     def twoCentroidsDist(self, centroida: str, centroidb: str, inplace: bool = False) -> pd.DataFrame | None:
+        """Extracts the euclidean distance between two centroids.
+
+        Args:
+            centroida (str): the first centroid. Must be a base feature (see basefeats attribute).
+            centroidb (str): the second centroid. Must be a base feature (see basefeats attribute).
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         print("\t Extracting distance between centroids:", centroida, "and", centroidb)
         if centroida not in self.basefeats:
             raise ValueError(f"Centroid 1 {centroida} not found")
@@ -125,17 +193,34 @@ class FeatureExtractor:
         centroida = self.extractCentroid(centroida, multiindex=False)
         centroidb = self.extractCentroid(centroidb, multiindex=False)
         distance = euclidean_distance(centroida, centroidb, multiindex=True)
-        self.calcData = self.calcData.join(distance)
-        return distance if not inplace else None
+        return distance if not inplace else self.calcData.join(distance, how="outer", inplace=True)
 
     def pointAngle(self, point: str, inplace: bool = False) -> pd.DataFrame | None:
+        """Extracts the vector angle of a point.
+
+        Args:
+            point (str): the point. Must be an original point (see points attribute).
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         if point not in self.points:
             raise ValueError(f"Point {point} not found")
         self.calcsLog.append(f"pointAngleDiff(point={point}, inplace={inplace})")
         angle = pd.DataFrame(self.polar[f"{point}_theta"], columns=pd.MultiIndex.from_product([[point], ["theta"]]))
-        return angle if not inplace else None
+        return angle if not inplace else self.calcData.join(angle, how="outer", inplace=True)
 
     def centroidAngle(self, centroid: str, inplace: bool = False) -> pd.DataFrame | None:
+        """Extracts the vector angle of a centroid.
+
+        Args:
+            centroid (str): the centroid. Must be a base feature (see basefeats attribute).
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         if centroid not in self.basefeats:
             raise ValueError(f"Centroid {centroid} not found")
         self.calcsLog.append(f"centroidAngleDiff(centroid={centroid}, inplace={inplace})")
@@ -143,9 +228,17 @@ class FeatureExtractor:
         if centroid_df is None:
             raise ValueError(f"Centroid {centroid} not found")
         angle = centroid_df.loc[:, (centroid, "theta")]
-        return angle if not inplace else None
+        return angle if not inplace else self.calcData.join(angle, how="outer", inplace=True)
 
     def velocities(self, inplace: bool = False) -> pd.DataFrame | None:
+        """Extracts the velocities of all the points.
+
+        Args:
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         self.calcsLog.append(f"velocities(inplace={inplace})")
         velocities = self.cartesian.loc[:, self.cartesianCols].diff()
         vel = [pd.Series] * len(self.points)
@@ -154,16 +247,24 @@ class FeatureExtractor:
             vel[i].iloc[0] = vel[i].iloc[1]
         velocities: pd.DataFrame = pd.concat(vel, axis=1, keys=self.points)
         velocities.columns = pd.MultiIndex.from_product([list(self.points), ["velocity"]])
-        return velocities if not inplace else None
+        return velocities if not inplace else self.calcData.join(velocities, how="outer", inplace=True)
 
     def velocity(self, point: str, inplace: bool = False) -> pd.DataFrame | None:
+        """Extracts the velocity of a single point.
+
+        Args:
+            inplace (bool, optional): whether to perform this computation in-place. Defaults to False.
+
+        Returns:
+            pd.DataFrame | None: The centroids of the base features. If inplace is True, returns None.
+        """
         if point not in self.points:
             raise ValueError(f"Point {point} not found")
         self.calcsLog.append(f"velocity(inplace={inplace})")
         velocity = self.cartesian.loc[:, [f"{point}_x", f"{point}_y"]].diff()
         velocity = pd.Series(np.sqrt(np.real(np.square(velocity[f"{point}_x"]) + np.square(velocity[f"{point}_y"])))).T
         velocity: pd.DataFrame = pd.DataFrame(velocity, columns=pd.MultiIndex.from_product([list(point), ["velocity"]]))
-        return velocity if not inplace else None
+        return velocity if not inplace else self.calcData.join(velocity, how="outer", inplace=True)
 
     def flattenScores(self) -> pd.Series:
         flatScores = self.scores.mean(axis=1)
@@ -171,7 +272,7 @@ class FeatureExtractor:
         return flatScores
 
     @property
-    def all(self) -> pd.DataFrame:
+    def all_data(self) -> pd.DataFrame:
         print("Extracting calculations")
         df = self.calcData
         print("Extracting centroids")

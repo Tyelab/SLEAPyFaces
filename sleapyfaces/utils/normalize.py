@@ -32,15 +32,23 @@ def z_score(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
     return data
 
 
-def pca(data: pd.DataFrame, track_names: list[str]) -> dict[str, pd.DataFrame]:
+def pca(data: pd.DataFrame, track_names: list[str], multiindex: bool = None, *args, **kwargs) -> dict[str, pd.DataFrame]:
     """Runs 2D and 3D PCA dimensionality reduction on the data.
 
     Args:
         data (pd.DataFrame): The data to be reduced.
         track_names (list[str]): The names of the tracks to be reduced.
+        *args, **kwargs: Additional arguments to pass to pd.DataFrame.reset_index().
 
     Returns:
         dict[str, pd.DataFrame]: The reduced data with keys "pca2d" and "pca3d"."""
+
+    if multiindex is None:
+        if isinstance(data.columns, pd.MultiIndex):
+            multiindex = True
+        else:
+            multiindex = False
+
     num_data = data.loc[:, track_names]
     qual_data = data.drop(columns=track_names)
     pcas = {}
@@ -63,8 +71,12 @@ def pca(data: pd.DataFrame, track_names: list[str]) -> dict[str, pd.DataFrame]:
         ],
     )
 
-    pcas["pca2d"] = pd.concat([qual_data.reset_index(), num_data_2d], axis=1)
-    pcas["pca3d"] = pd.concat([qual_data.reset_index(), num_data_3d], axis=1)
+    if multiindex:
+        num_data_2d.columns = pd.MultiIndex.from_product([["PCA-2D"], num_data_2d.columns])
+        num_data_3d.columns = pd.MultiIndex.from_product([["PCA-3D"], num_data_3d.columns])
+
+    pcas["pca2d"] = pd.concat([qual_data.reset_index( *args, **kwargs), num_data_2d], axis=1)
+    pcas["pca3d"] = pd.concat([qual_data.reset_index( *args, **kwargs), num_data_3d], axis=1)
 
     return pcas
 
