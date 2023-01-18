@@ -416,7 +416,7 @@ def matplotlib_2d(data: np.ndarray, color: list | str | np.ndarray = None, xrang
             ax.scatter(data[0], data[1], c=color, cmap="viridis")
             feats = np.unique(color).tolist()
             cmap = plt.cm.viridis
-            colors = [scatter([], [], c=cmap(i/len(feats))) for i in range(len(feats))]
+            colors = [scatter([], [], color=cmap(i/len(feats))) for i in range(len(feats))]
             fig.legend(colors, feats, loc='upper right')
         else:
             ax.scatter(data[0], data[1], c=color)
@@ -472,10 +472,10 @@ def matplotlib_3d(data: np.ndarray | pd.DataFrame, color: list | str | np.ndarra
             else:
                 raise TypeError("if color is instance of np.ndarray it must be a numeric array.")
         if type(color) is not str:
-            ax.scatter(data[0], data[1], data[2], c=color, cmap="viridis")
+            ax.scatter(data[0], data[1], data[2], s=4, c=color, cmap="viridis")
             feats = np.unique(color).tolist()
             cmap = plt.cm.viridis
-            colors = [scatter(x=[], y=[], s=4, c=cmap(i/len(feats))) for i in range(len(feats))]
+            colors = [scatter(x=[], y=[], s=4, color=cmap(i/len(feats))) for i in range(len(feats))]
             fig.legend(colors, feats, loc='upper right')
         else:
             ax.scatter(data[0], data[1],  data[2], c=color)

@@ -174,7 +174,7 @@ class Experiment:
         start_indecies = np.unique(np.array(start_indecies, dtype=np.int64))
         end_indecies = np.unique(np.array(end_indecies, dtype=np.int64))
 
-        self.trialData = into_trial_format(
+        self.allTrials = into_trial_format(
             self.sleap.tracks,
             self.beh.cache.loc[:, "trialArray"],
             start_indecies,
@@ -186,15 +186,16 @@ class Experiment:
             start_indecies,
             end_indecies,
         )
-        self.trialData = [i for i in self.trialData if type(i) is pd.DataFrame]
+        self.allTrials = [i for i in self.allTrials if type(i) is pd.DataFrame]
         self.trialScores = [i for i in self.trialScores if type(i) is pd.DataFrame]
-        if len(self.trialData) != len(self.trialScores):
+        if len(self.allTrials) != len(self.trialScores):
             warnings.warn(
                 "The number of trial dataframes does not match the number of trial score dataframes.", RuntimeWarning
             )
         self.trials = pd.concat(
-            self.trialData, axis=0, keys=[i for i in range(len(self.trialData))]
+            self.allTrials, axis=0, keys=[i for i in range(len(self.allTrials))]
         )
+        self.trials.index.names = ["Trial", "Trial_index"]
         self.scoredTrials = pd.concat(
             self.trialScores, axis=0, keys=[i for i in range(len(self.trialScores))]
         )
@@ -208,7 +209,7 @@ class Experiment:
         print(self.tabs, "Saving experiment:", self.name)
         with pd.HDFStore(filename) as store:
             store.put("trials", self.trials, format="table", data_columns=True)
-            for i, trial in enumerate(self.trialData):
+            for i, trial in enumerate(self.allTrials):
                 store.put(f"trialData/trial{i}", trial, format="table", data_columns=True)
 
     def meanCenter(self, alldata: bool = False):
@@ -224,14 +225,15 @@ class Experiment:
                             pd.concat(
                                 [
                                     mean_center(
-                                        self.trialData[i], self.numeric_columns
-                                    ) for i in range(len(self.trialData))
+                                        self.allTrials[i], self.numeric_columns
+                                    ) for i in range(len(self.allTrials))
                                 ],
                                 axis=0,
-                                keys=range(len(self.trialData)),
+                                keys=range(len(self.allTrials)),
                             ),
                             self.numeric_columns
                         )
+            self.all_data.index.names = ["Trial", "Trial_index"]
 
     def zScore(self, alldata: bool = False):
         """Z scores the mean centered data for each experiment
@@ -246,14 +248,15 @@ class Experiment:
                             pd.concat(
                                 [
                                     z_score(
-                                        self.trialData[i], self.numeric_columns
-                                    ) for i in range(len(self.trialData))
+                                        self.allTrials[i], self.numeric_columns
+                                    ) for i in range(len(self.allTrials))
                                 ],
                                 axis=0,
-                                keys=range(len(self.trialData)),
+                                keys=range(len(self.allTrials)),
                             ),
                             self.numeric_columns
                         )
+            self.all_data.index.names = ["Trial", "Trial_index"]
 
     def normalize(self):
         """Runs the mean centering and z scoring functions
@@ -266,28 +269,43 @@ class Experiment:
                             pd.concat(
                                 [
                                     mean_center(
-                                        self.trialData[i], self.numeric_columns
-                                    ) for i in range(len(self.trialData))
+                                        self.allTrials[i], self.numeric_columns
+                                    ) for i in range(len(self.allTrials))
                                 ],
                                 axis=0,
-                                keys=range(len(self.trialData)),
+                                keys=range(len(self.allTrials)),
                             ),
                             self.numeric_columns
                         )
+        self.all_data.index.names = ["Trial", "Trial_index"]
 
-    def runPCA(self):
-        self.pcas = pca(self.all_data, self.numeric_columns)
+    def runPCA(self, data: pd.DataFrame = None, numeric_columns: list[str] | pd.Index = None):
+        """Reduces `all_data` to 2 and 3 dimensions using PCA
 
-    def visualize(self, dimensions: int, filename=None, *args, **kwargs) -> go.Figure:
+        Initializes attributes:
+            pcas (dict[str, pd.DataFrame]): a dictionary containing the 2 and 3 dimensional PCA data for each experiment (the keys are 'pca2d', 'pca3d')
+        """
+        if data is not None and numeric_columns is not None:
+            self.pcas = pca(data, numeric_columns)
+        elif data is not None:
+            self.pcas = pca(data, self.numeric_columns)
+        else:
+            self.pcas = pca(self.data, self.numeric_columns)
+
+    def visualize(self, dimensions: int, normalized: bool = False, color_column: str = "Trial", filename: str = None, *args, **kwargs) -> go.Figure:
         """Plots the data from the PCA
 
         Args:
             filename (str, optional): The filename to save the plot to. Defaults to None.
         """
+        if normalized:
+            self.runPCA()
+        elif not normalized:
+            self.runPCA(pd.concat(self.allTrials, keys=range(len(self.allTrials))), self.numeric_columns)
         if dimensions == 2:
-            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color="Mouse")
+            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color=color_column)
         elif dimensions == 3:
-            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
+            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color=color_column)
         else:
             raise ValueError("dimensions must be 2 or 3")
         if filename is not None:

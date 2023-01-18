@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from sleapyfaces.types.proj import Project
+from sleapyfaces.base.proj import Project
 from sleapyfaces.utils.normalize import mean_center, pca, z_score
 
 
@@ -116,8 +116,10 @@ class Projects:
         print(self.tabs, "Building trials...")
         for project in self.projects.values():
             project.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        self.allTrials = [trial for project in self.projects.values() for trial in project.allTrials]
         self.all_data = pd.concat([project.all_data for project in self.projects.values()], keys=self.names)
         self.all_scores = pd.concat([project.all_scores for project in self.projects.values()], keys=self.names)
+        self.all_data.index.names = ["Project", "Experiment", "Trial", "Trial_index"]
 
     def meanCenter(self, alldata: bool = False):
         if alldata:
@@ -132,6 +134,7 @@ class Projects:
                         for project in self.projects.values()
                     ], keys=self.names
                 ), self.numeric_columns)
+            self.all_data.index.names = ["Project", "Experiment", "Trial", "Trial_index"]
 
     def zScore(self, alldata: bool = False):
         if alldata:
@@ -146,6 +149,7 @@ class Projects:
                         for project in self.projects.values()
                     ], keys=self.names
                 ), self.numeric_columns)
+            self.all_data.index.names = ["Project", "Experiment", "Trial", "Trial_index"]
 
     def normalize(self):
         print(self.tabs, "Normalizing...")
@@ -160,20 +164,35 @@ class Projects:
                 ),
             self.numeric_columns
         )
+        self.all_data.index.names = ["Project", "Experiment", "Trial", "Trial_index"]
 
-    def runPCA(self):
-        self.pcas = pca(self.all_data, self.numeric_columns)
+    def runPCA(self, data: pd.DataFrame = None, numeric_columns: list[str] | pd.Index = None):
+        """Reduces `all_data` to 2 and 3 dimensions using PCA
 
-    def visualize(self, dimensions: int, filename=None, *args, **kwargs) -> go.Figure:
+        Initializes attributes:
+            pcas (dict[str, pd.DataFrame]): a dictionary containing the 2 and 3 dimensional PCA data for each experiment (the keys are 'pca2d', 'pca3d')
+        """
+        if data is not None and numeric_columns is not None:
+            self.pcas = pca(data, numeric_columns)
+        elif data is not None:
+            self.pcas = pca(data, self.numeric_columns)
+        else:
+            self.pcas = pca(self.data, self.numeric_columns)
+
+    def visualize(self, dimensions: int, normalized: bool = False, color_column: str = "Trial", filename: str = None, *args, **kwargs) -> go.Figure:
         """Plots the data from the PCA
 
         Args:
             filename (str, optional): The filename to save the plot to. Defaults to None.
         """
+        if normalized:
+            self.runPCA()
+        elif not normalized:
+            self.runPCA(pd.concat(self.allTrials, keys=range(len(self.allTrials))), self.numeric_columns)
         if dimensions == 2:
-            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color="Mouse")
+            fig = px.scatter(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", color=color_column)
         elif dimensions == 3:
-            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color="Mouse")
+            fig = px.scatter_3d(self.pcas[f"pca{dimensions}d"], x="principal component 1", y="principal component 2", z="principal component 3", color=color_column)
         else:
             raise ValueError("dimensions must be 2 or 3")
         if filename is not None:

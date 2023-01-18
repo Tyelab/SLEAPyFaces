@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 from .__about__ import *
 
-from sleapyfaces.types import Experiment, Project, Projects
+from sleapyfaces.base import Experiment, Project, Projects
 from sleapyfaces.io import SLEAPanalysis, DAQData, BehMetadata, VideoMetadata
 from sleapyfaces.utils.structs import File, FileConstructor, CustomColumn
 from sleapyfaces.utils.normalize import mean_center, z_score, pca, gaussian_kernel
