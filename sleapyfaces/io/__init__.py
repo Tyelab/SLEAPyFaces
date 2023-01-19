@@ -1,3 +1,3 @@
-from sleapyfaces.io.events import DAQData
-from sleapyfaces.io.metadata import BehMetadata, VideoMetadata
-from sleapyfaces.io.sleap import SLEAPanalysis
+from sleapyfaces.io.events import EventsData
+from sleapyfaces.io.metadata import ExprMetadata, VideoMetadata
+from sleapyfaces.io.sleap import SLEAPData

@@ -4,10 +4,10 @@ import pandas as pd
 from io import FileIO
 
 @dataclass(slots=True)
-class DAQData:
+class EventsData:
     """
     Summary:
-        Cache for DAQ data.
+        Cache for DAQ events data.
 
     Attrs:
         path (Text or PathLike[Text]): Path to the directory containing the DAQ data.

@@ -13,7 +13,7 @@ from sleapyfaces.utils.reform import (
 import h5py as h5
 
 @dataclass(slots=True)
-class SLEAPanalysis:
+class SLEAPData:
     """
     Summary:
         a class for reading and storing SLEAP analysis files

@@ -1,8 +1,20 @@
-from sleapyfaces.utils.structs import File, FileConstructor, CustomColumn
+from sleapyfaces.utils.structs import CustomColumn
+from sleapyfaces.utils.normalize import mean_center, pca, z_score
 import os
 from config import config
+from config.configuration_set import ConfigurationSet
+import logging
+import itertools
+from typing import Protocol
+from pathvalidate._filename import is_valid_filename
+import pandas as pd
+import plotly.graph_objects as go
+import pickle
 
 class objdict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def __getattr__(self, name):
         if name in self:
             return self[name]
@@ -18,58 +30,133 @@ class objdict(dict):
         else:
             raise AttributeError("No such attribute: " + name)
 
+def all_equal(iterable):
+    "Returns True if all the elements are equal to each other"
+    g = itertools.groupby(iterable)
+    return next(g, True) and not next(g, False)
+
+
 default_config = {
     "Files": {
-        "PathHierarchy": {
-            "ExperimentEvents": ["base", "project", "experiment"],
-            "SLEAP": ["base", "project", "experiment"],
-            "Video": ["base", "project", "experiment"],
-            "ExperimentSetup": ["base", "project", "experiment"],
-        },
         "FileTypes": {
             "ExperimentEvents": "csv",
-            "SLEAP": "hdf5",
+            "sleap": "hdf5",
             "Video": "mp4",
             "ExperimentSetup": "json"
         },
         "FileNaming": {
             "ExperimentEvents": "*_events.csv",
-            "SLEAP": "*.h5",
+            "sleap": "*.h5",
             "Video": "*.mp4",
             "ExperimentSetup": "*.json"
         },
         "FileGlob": {
             "ExperimentEvents": True,
-            "SLEAP": True,
+            "sleap": True,
             "Video": True,
             "ExperimentSetup": True
         }
     },
+    "Prefixes": {
+        "Project": None,
+        "Experiment": "week",
+    },
+    "TrialEvents": {
+        "TrackedData": ["Speaker_on", "LED590_on"],
+        "Reduced": [False, True],
+        "start_buffer": 10000,
+        "end_buffer": 13000
+    },
     "ExperimentEvents" : "columns",
     "SLEAP": "datasets",
-    "Video": "video-metadata",
+    "Video": "metadata",
     "ExperimentSetup": {
-        "beh_metadata": {
-            "trialArray": "columns",
-            "ITIArray": "columns"
-        }
+        "beh_metadata": ["trialArray", "ITIArray"]
     },
-    "logging-level": "INFO"
+    "Logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "filename": None,
+    }
 }
+
+class DataClassProtocol(Protocol):
+    base: str
+    name: str
+    names: list[str]
+    paths: list[str]
+    fileStruct: dict[str, str]
+    ExprEventsFile: tuple[str, bool] | str
+    ExprSetupFile: tuple[str, bool] | str
+    SLEAPFile: tuple[str, bool] | str
+    VideoFile: tuple[str, bool] | str
+    level: str
+    tabs: str
+    config: dict[str, any]
+    data: dict[str, object]
+    all_data: pd.DataFrame
+    all_scores: pd.DataFrame
+    custom_columns: list[CustomColumn]
+    all_trials: list[pd.DataFrame]
+    numeric_columns: list[str]
+
+    def __init__(
+        self,
+        name: str,
+        base: str,
+        file_structure: dict[str, str] | bool = None,
+        ExperimentEventsFile: tuple[str, bool] | str = None,
+        ExperimentSetupFile: tuple[str, bool] | str = None,
+        SLEAPFile: tuple[str, bool] | str = None,
+        VideoFile: tuple[str, bool] | str = None,
+        tabs: str = "",
+        passed_config: dict[str, any] = None,
+        prefix: str = None,
+        *args,
+        **kwargs) -> None:
+
+        self.base = base
+        self.name = name
+        self.fileStruct = file_structure
+        self.ExprEventsFile = ExperimentEventsFile
+        self.ExprSetupFile = ExperimentSetupFile
+        self.SLEAPFile = SLEAPFile
+        self.VideoFile = VideoFile
+        self.tabs = tabs
+        self.config = passed_config
+
+    def buildColumns(self, columns: list = None, values: list = None):
+        pass
+    def buildTrials(self, trials: list = None, values: list = None):
+        pass
+    def meanCenter(self, alldata: bool = False):
+        pass
+    def zScore(self, alldata: bool = False):
+        pass
+    def normalize(self, alldata: bool = False):
+        pass
+    def pca(self, alldata: bool = False):
+        pass
+    def visualize(self, alldata: bool = False):
+        pass
+    def save(self, filename: str | pd.HDFStore, title: str = None, all: bool = False):
+        pass
 
 class BaseType:
     """Base type for project/experiment/projects
 
     Args:
-        DAQFile (tuple[str, bool]): a tuple with the first argument being the naming convention for the DAQ files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_events.csv", True) or ("DAQOutput.csv", False))
-        ExprMetaFile (str): a tuple with the first argument being the naming convention for the experimental structure files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_config.json", True) or ("BehMetadata.json", False))
-        SLEAPFile (str): a tuple with the first argument being the naming convention for the SLEAP files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*_sleap.h5", True) or ("SLEAP.h5", False))
-        VideoFile (str): a tuple with the first argument being the naming convention for the video files and the second argument whether or not to find the file based on a globular expression passed in the first argument (e.g. ("*.mp4", True) or ("video.avi", False))
-        base (str): Base path of the project (e.g. "/specialk_cs/2p/raw/CSE009")
-        iterator (dict[str, str]): Iterator for the project files, with keys as the label and values as the folder name (e.g. {"week 1": "20211105", "week 2": "20211112"})
-        glob (bool): Whether to use glob to find the files (e.g. True or False)
-            NOTE: if glob is True, make sure to include the file extension in the naming convention
-        name (str): Name of the project (e.g. "CSE009")
+        name (str): the name of the project/experiment
+        base (str): the base directory of the project/experiment
+        file_structure (dict[str, str] | bool): the file structure of the project/experiment
+        ExperimentEventsFile (tuple[str, bool] | str): the naming convention for the experimental events files (e.g. ("*_events.csv", True) or ("DAQOutput.csv", False))
+        ExperimentSetupFile (tuple[str, bool] | str): the naming convention for the experimental structure files (e.g. ("*_config.json", True) or ("BehMetadata.json", False))
+        SLEAPFile (tuple[str, bool] | str): the naming convention for the SLEAP files (e.g. ("*_sleap.h5", True) or ("SLEAP.h5", False))
+        VideoFile (tuple[str, bool] | str): the naming convention for the video files (e.g. ("*_video.mp4", True) or ("Video.mp4", False))
+        tabs (str): the tabs to use for logging
+        passed_config (dict[str, any]): the config to use for the project/experiment
+        prefix (str): the prefix to use for the project/experiment (e.g. "week") in the dataframes
+        *args, **kwargs: Additional arguments to pass to the _init_config method
 
     """
 
@@ -77,92 +164,140 @@ class BaseType:
         self,
         name: str,
         base: str,
-        project: str = None,
-        experiment: str = None,
-        file_structure: dict[str, dict[str, str]] = None,
-        config_file: str = None,
-        config_separator: str = "__",
-        interpolate_config: bool = False,
-        config_dict: dict = None,
-        config_prefix: str = "sleapyfaces",
-        ExperimentEventsFile: tuple[str, bool] | File | str = None,
-        ExperimentSetupFile: tuple[str, bool] | File | str = None,
-        SLEAPFile: tuple[str, bool] | File | str = None,
-        VideoFile: tuple[str, bool] | File | str = None,
-        Files: FileConstructor = None,
+        file_structure: dict[str, str] | bool = None,
+        ExperimentEventsFile: tuple[str, bool] | str = None,
+        ExperimentSetupFile: tuple[str, bool] | str = None,
+        SLEAPFile: tuple[str, bool] | str = None,
+        VideoFile: tuple[str, bool] | str = None,
         tabs: str = "",
+        passed_config: dict[str, any] | ConfigurationSet = None,
+        prefix: str = None,
+        sublevel: str = "base",
         *args,
         **kwargs) -> None:
 
         self.base = base
         self.name = name
-        self.project = project
-        self.experiment = experiment
         self.fileStruct = file_structure
-        self.DAQFile = ExperimentEventsFile
-        self.BehFile = ExperimentSetupFile
+        self.ExprEventsFile = ExperimentEventsFile
+        self.ExprSetupFile = ExperimentSetupFile
         self.SLEAPFile = SLEAPFile
         self.VideoFile = VideoFile
-        self.files = Files
-        self.config = config([
-                ('env', config_prefix, config_separator),
-                ('json', config_file, True),
-                ('yaml', config_file, True),
-                ('toml', config_file, True),
-                ('ini', config_file, True),
-                ('dict', config_dict)
-                ('dict', default_config)
-            ],
-            prefix=config_prefix,
-            separator=config_separator,
-            ignore_missing_paths=True,
-            interpolate=interpolate_config
-        )
-        self.pathHierarchy = self.config["Files"]["PathHierarchy"].as_attrdict()
+        self.tabs = tabs
+        self.sublevel = sublevel
+        self.prefix = prefix
+
+        if passed_config is None:
+            self.config = self._init_config(*args, **kwargs)
+        else:
+            self.config = passed_config
+
         self.fileTypes = self.config["Files"]["FileTypes"].as_attrdict()
         self.fileNaming = self.config["Files"]["FileNaming"].as_attrdict()
         self.fileGlob = self.config["Files"]["FileGlob"].as_attrdict()
 
-        print("=========================================")
-        print(tabs, "Initializing Project...", self.name)
-        print(tabs + "\t", "Path:", self.base)
-        print("=========================================")
+        if self.prefix is None and self.sublevel is not None:
+            if self.sublevel in self.config["Prefixes"]:
+                self.prefix = self.config["Prefixes"][self.sublevel]
 
-        self.iterator = {}
-        if len(self.iterator.keys()) == 0:
-            self.weeks = os.listdir(self.base)
-            self.weeks = [
-                week for week in self.weeks if os.path.isdir(os.path.join(self.base, week))
-            ]
-            self.weeks.sort()
-            for i, week in enumerate(self.weeks):
-                self.iterator[f"{self.prefix}_{i+1}"] = week
-        self.exprs: dict[str, Experiment] = {}
-        self.files: list[str] = [os.path.join(self.base, path) for path in list(self.iterator.values())]
-        self.names: list[str] = list(self.iterator.keys())
-        self.tabs = tabs
-        for name, file in self.iterator.items():
-            reuse = os.path.join(self.base, file)
-            self.exprs[name]: Experiment = Experiment(name, FileConstructor(File(
-                reuse,
-                self.DAQFile[0],
-                self.DAQFile[1],
-            ), File(
-                reuse,
-                self.SLEAPFile[0],
-                self.SLEAPFile[1],
-            ), File(
-                reuse,
-                self.BehFile[0],
-                self.BehFile[1],
-            ), File(
-                reuse,
-                self.VideoFile[0],
-                self.VideoFile[1],
-            )), tabs=tabs + "\t")
-        self.numeric_columns: list[str] = self.exprs[name].numeric_columns
-        self.all_data: pd.DataFrame = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
-        self.all_scores: pd.DataFrame = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
+        if self.fileStruct is None:
+            self.fileStruct = self._init_file_structure(self.base, prefix)
+
+        if self.fileStruct is not None and self.fileStruct is not False:
+            self.names: list[str] = list(self.fileStruct.keys())
+            self.paths: list[str] = list(self.fileStruct.values())
+
+        if self.ExprEventsFile is None:
+            self.ExprEventsFile = (self.fileNaming.ExperimentEvents, self.fileGlob.ExperimentEvents)
+        elif self.ExprEventsFile is str:
+            if is_valid_filename(self.ExprEventsFile):
+                self.ExprEventsFile = (self.ExprEventsFile, False)
+            else:
+                self.ExprEventsFile = (self.ExprEventsFile, True)
+
+        if self.ExprSetupFile is None:
+            self.ExprSetupFile = (self.fileNaming.ExperimentSetup, self.fileGlob.ExperimentSetup)
+        elif self.ExprSetupFile is str:
+            if is_valid_filename(self.ExprSetupFile):
+                self.ExprSetupFile = (self.ExprSetupFile, False)
+            else:
+                self.ExprSetupFile = (self.ExprSetupFile, True)
+
+        if self.SLEAPFile is None:
+            self.SLEAPFile = (self.fileNaming.sleap, self.fileGlob.sleap)
+        elif self.SLEAPFile is str:
+            if is_valid_filename(self.SLEAPFile):
+                self.SLEAPFile = (self.SLEAPFile, False)
+            else:
+                self.SLEAPFile = (self.SLEAPFile, True)
+
+        if self.VideoFile is None:
+            self.VideoFile = (self.fileNaming.Video, self.fileGlob.Video)
+        elif self.VideoFile is str:
+            if is_valid_filename(self.VideoFile):
+                self.VideoFile = (self.VideoFile, False)
+            else:
+                self.VideoFile = (self.VideoFile, True)
+        self.data = {}
+        self._init_data()
+
+    def _init_config(self, config_prefix: str = None, config_separator: str = None, config_file: str = None, config_dict: dict = None, interpolate_config: bool = False) -> ConfigurationSet:
+        """Initializes the config file for the project
+
+        Args:
+            config_prefix (str): the prefix for the sleapyfaces config parameters in the environment variables
+            config_separator (str): the separator used to separate the config parameters in the environment variables
+            config_file (str): the path to the config file
+            config_dict (dict): a dictionary of the config file
+            interpolate_config (bool): whether to interpolate the config file
+
+        Returns:
+            configuration (ConfigurationSet): the hierarchical configuration set for the project
+        """
+        configs = []
+        if config_prefix is not None:
+            configs.append(('env', config_prefix, config_separator))
+        if config_file is not None:
+            configs.append(('json', config_file, True))
+            configs.append(('yaml', config_file, True))
+            configs.append(('toml', config_file, True))
+            configs.append(('ini', config_file, True))
+        if config_dict is not None:
+            configs.append(('dict', config_dict))
+        configs.append(('dict', default_config))
+        configuration = config(*configs, interpolate=interpolate_config)
+        logging.basicConfig(
+            filename = configuration["Logging"]["filename"],
+            format=configuration["Logging"]["format"],
+            level=configuration["Logging"]["level"]
+        )
+        return configuration
+
+    def _init_file_structure(self, base, prefix: str = None) -> dict[str, any]:
+        iterator = {}
+        subdirs = os.listdir(base)
+        subdirs = [
+            subdir for subdir in subdirs if os.path.isdir(os.path.join(base, subdir))
+        ]
+        subdirs.sort()
+        if prefix is not None:
+            for i, subdir in enumerate(subdirs):
+                iterator[f"{prefix}_{i}"] = subdir
+        else:
+            for i, subdir in enumerate(subdirs):
+                iterator[f"{i}"] = subdir
+        return iterator
+
+    def _init_data(self) -> dict[str, DataClassProtocol]:
+        data = {"test": DataClassProtocol()}
+        self.data: dict[str, DataClassProtocol] = data
+        self.all_data = pd.concat([data.all_data for data in self.data.values()], keys=self.data.keys())
+        self.all_scores = pd.concat([data.all_scores for data in self.data.values()], keys=self.data.keys())
+        self.numeric_columns = self.data[self.names[0]].numeric_columns
+
+    def _rename_index(self, df: pd.DataFrame) -> pd.DataFrame:
+        df.index.names = []
+        return df
 
     def buildColumns(self, columns: list = None, values: list = None):
         """Builds the custom columns for the project and builds the data for each experiment
@@ -173,31 +308,36 @@ class BaseType:
 
         Initializes attributes:
             custom_columns (list[CustomColumn]): list of custom columns
+
+        Updates attributes:
             all_data (pd.DataFrame): the data for all experiments concatenated together
             all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
-        print(self.tabs, "Building custom columns:")
-        if columns is None:
-            if not hasattr(self.exprs[self.names[0]], "custom_columns"):
-                for expr in self.exprs.values():
-                    expr.buildData()
-        elif len(columns) != len(values):
+        logging.info("Building columns...")
+        if columns is None and not hasattr(self.data[self.names[0]], "custom_columns"):
+            for data in self.data.values():
+                data.buildColumns()
+        elif len(columns) != len(values) and not isinstance(columns[0], CustomColumn):
             raise ValueError("Number of columns and values must be equal")
+        elif isinstance(columns[0], CustomColumn):
+            for data in self.data.values():
+                self.custom_columns = columns
+                data.buildColumns(self.custom_columns)
         else:
-            print(self.tabs, [(col, val) for col, val in zip(columns, values)])
+            logging.debug(self.tabs, [(col, val) for col, val in zip(columns, values)])
             self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
-            for expr in self.exprs.values():
-                expr.buildData(self.custom_columns)
-        self.custom_columns = self.exprs[self.names[0]].custom_columns
-        self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
-        self.all_scores = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
+            for data in self.data.values():
+                data.buildColumns(self.custom_columns)
+        self.custom_columns = self.data[self.names[0]].custom_columns
+        self.all_data = pd.concat([data.all_data for data in self.data.values()], keys=self.names)
+        self.all_scores = pd.concat([data.all_scores for data in self.data.values()], keys=self.names)
 
     def buildTrials(
         self,
-        TrackedData: list[str],
-        Reduced: list[bool],
-        start_buffer: int = 10000,
-        end_buffer: int = 13000,
+        TrackedData: list[str] = None,
+        Reduced: list[bool] = None,
+        start_buffer: int = None,
+        end_buffer: int = None,
     ):
         """Parses the data from each experiment into its individual trials
 
@@ -208,18 +348,33 @@ class BaseType:
             end_buffer (int, optional): The time in milliseconds after the trial start to capture. Defaults to 13000.
 
         Initializes attributes:
-            exprs[i].trials (pd.DataFrame): the data frame containing the concatenated trial data for each experiment
-            exprs[i].trialData (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
+            all_trials (list[pd.DataFrame]): the list of data frames containing the trial data for each trial for each experiment
+
+        Updates attributes:
             all_data (pd.DataFrame): the data for all experiments and trials concatenated together
             all_scores (pd.DataFrame): the scores for all experiments and trials concatenated together
         """
-        print(self.tabs, "Building trials for project:", self.name)
-        for expr in self.exprs.values():
-            expr.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
-        self.allTrials = [trial for expr in self.exprs.values() for trial in expr.allTrials]
-        self.all_data = pd.concat([expr.data for expr in self.exprs.values()], keys=self.names)
-        self.all_data.index.names = ["Experiment", "Trial", "Trial_index"]
-        self.all_scores = pd.concat([expr.scores for expr in self.exprs.values()], keys=self.names)
+        if TrackedData is None:
+            TrackedData = self.config["TrialEvents"]["TrackedData"]
+        if Reduced is None:
+            Reduced = self.config["TrialEvents"]["Reduced"]
+        if start_buffer is None:
+            start_buffer = self.config["TrialEvents"]["start_buffer"]
+        if end_buffer is None:
+            end_buffer = self.config["TrialEvents"]["end_buffer"]
+        if len(TrackedData) != len(Reduced):
+            raise ValueError("TrackedData and Reduced must be the same length")
+        if TrackedData is None or Reduced is None or start_buffer is None or end_buffer is None:
+            raise ValueError("TrackedData, Reduced, start_buffer, and end_buffer must all be specified either directly or in the config file")
+
+        print(self.tabs, "Building trials for:", self.name)
+
+        for data in self.data.values():
+            data.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
+        self.all_trials = [trial for data in self.data.values() for trial in data.all_trials]
+        self.all_data = pd.concat([data.all_data for data in self.data.values()], keys=self.names)
+        self.all_data = self._rename_index(self.all_data)
+        self.all_scores = pd.concat([data.all_scores for data in self.data.values()], keys=self.names)
 
     def meanCenter(self, alldata: bool = False):
         """Recursively mean centers the data for each trial for each experiment
@@ -230,17 +385,17 @@ class BaseType:
         if alldata:
             self.all_data = mean_center(self.all_data, self.numeric_columns)
         else:
-            for expr in self.exprs.values():
-                expr.meanCenter()
+            for data in self.data.values():
+                data.meanCenter()
             self.all_data = mean_center(
                 pd.concat(
                     [
-                        expr.data for expr in self.exprs.values()
+                        data.all_data for data in self.data.values()
                     ],
                     keys=self.names
                 ),
                 self.numeric_columns)
-            self.all_data.index.names = ["Experiment", "Trial", "Trial_index"]
+            self.all_data = self._rename_index(self.all_data)
 
     def zScore(self, alldata: bool = False):
         """Z scores the mean centered data for each experiment
@@ -251,17 +406,17 @@ class BaseType:
         if alldata:
             self.all_data = z_score(self.all_data, self.numeric_columns)
         else:
-            for expr in self.exprs.values():
-                expr.zScore()
+            for data in self.data.values():
+                data.zScore()
             self.all_data = z_score(
                 pd.concat(
                     [
-                        expr.data for expr in self.exprs.values()
+                        data.all_data for data in self.data.values()
                     ],
                     keys=self.names
                 ),
                 self.numeric_columns)
-            self.all_data.index.names = ["Experiment", "Trial", "Trial_index"]
+            self.all_data = self._rename_index(self.all_data)
 
     def normalize(self):
         """Runs the mean centering and z scoring functions
@@ -269,18 +424,20 @@ class BaseType:
         Updates attributes:
             all_data (pd.DataFrame): the normaized data for all experiments concatenated together
         """
-        print(self.tabs, "Normalizing project", self.name)
-        for expr in self.exprs.values():
-                expr.normalize()
+
+        logging.info(self.tabs, "Normalizing project", self.name)
+
+        for data in self.data.values():
+                data.normalize()
         self.all_data = z_score(
                 pd.concat(
                     [
-                        expr.data for expr in self.exprs.values()
+                        data.all_data for data in self.data.values()
                     ],
                     keys=self.names
                 ),
                 self.numeric_columns)
-        self.all_data.index.names = ["Experiment", "Trial", "Trial_index"]
+        self.all_data = self._rename_index(self.all_data)
 
     def runPCA(self, data: pd.DataFrame = None, numeric_columns: list[str] | pd.Index = None):
         """Reduces `all_data` to 2 and 3 dimensions using PCA
@@ -289,11 +446,11 @@ class BaseType:
             pcas (dict[str, pd.DataFrame]): a dictionary containing the 2 and 3 dimensional PCA data for each experiment (the keys are 'pca2d', 'pca3d')
         """
         if data is not None and numeric_columns is not None:
-            self.pcas = pca(data, numeric_columns)
+            self.pcas = objdict(pca(data, numeric_columns))
         elif data is not None:
-            self.pcas = pca(data, self.numeric_columns)
+            self.pcas = objdict(pca(data, self.numeric_columns))
         else:
-            self.pcas = pca(self.data, self.numeric_columns)
+            self.pcas = objdict(pca(self.all_data, self.numeric_columns))
 
     def visualize(self, dimensions: int, normalized: bool = False, color_column: str = "Trial", lines: bool = False, filename: str = None, *args, **kwargs) -> go.Figure:
         """Plots the trajectories from the PCA
@@ -304,78 +461,97 @@ class BaseType:
         if normalized:
             self.runPCA()
         elif not normalized:
-            df = pd.concat(self.allTrials, keys=range(len(self.allTrials)))
+            df: pd.DataFrame = pd.concat(self.all_trials, keys=range(len(self.all_trials)))
             df.index.rename(["Trial", "Trial_index"], inplace=True)
-            self.runPCA(df, self.numeric_columns)
+            self.runPCA(df.reset_index(), self.numeric_columns)
 
         self.pcas[f"pca{dimensions}d"][color_column] = self.pcas[f"pca{dimensions}d"][color_column].astype(str)
 
         if dimensions == 2:
-            fig = go.Figure(go.Scatter(x=self.pcas[f"pca{dimensions}d"]["principal component 1"], y=self.pcas[f"pca{dimensions}d"]["principal component 2"], mode = "markers+lines" if lines else "markers", marker=dict(size=4, color=self.pcas[f"pca{dimensions}d"][color_column])))
+            fig = go.Figure(
+                data=[go.Scatter(
+                    x=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 1"],
+                    y=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 2"],
+                    mode = "markers+lines" if lines else "markers",
+					customdata=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color],
+                    marker=dict(size=4)) for color in self.pcas[f"pca{dimensions}d"][color_column].unique()]
+            )
         elif dimensions == 3:
-            fig = go.Figure(go.Scatter3d(x=self.pcas[f"pca{dimensions}d"]["principal component 1"], y=self.pcas[f"pca{dimensions}d"]["principal component 2"], z=self.pcas[f"pca{dimensions}d"]["principal component 3"], mode = "markers+lines" if lines else "markers", marker=dict(size=4, color=self.pcas[f"pca{dimensions}d"][color_column])))
+            fig = go.Figure(
+                data=[go.Scatter3d(
+                    x=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 1"],
+                    y=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 2"],
+                    z=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 3"],
+                    mode = "markers+lines" if lines else "markers",
+                    customdata=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color],
+                    marker=dict(size=4)) for color in self.pcas[f"pca{dimensions}d"][color_column].unique()]
+            )
         else:
             raise ValueError("dimensions must be 2 or 3")
-
-        if lines:
-            fig.update_traces(line=dict(size=1, color=self.pcas[f"pca{dimensions}d"][color_column]))
 
         if filename is not None:
             if filename.lower().endswith('.html'):
                 fig.write_html(filename, *args, **kwargs)
             else:
                 fig.write_image(filename, *args, **kwargs)
+
         return fig
 
-    def save(self, filename: str | pd.HDFStore, title: str = None):
-        """Saves the project data to a HDF5 file
+    def save(self, filename: str | pd.HDFStore, title: str = None, all: bool = False):
+        """Saves the project data to a HDF5 file or HDFStore or a pickle file
 
         Args:
             filename (str): The filename to save the data to
         """
-        with pd.HDFStore(filename) as store:
-            if self.name is not None:
-                store.put(f"projects/{self.name}/data", self.data)
-                store.put(f"projects/{self.name}/scores", self.scores)
-            elif title is not None:
-                store.put(f"projects/{title}/data", self.data)
-                store.put(f"projects/{title}/scores", self.scores)
+        if all and isinstance(filename, str):
+            if filename.lower().endswith(".h5"):
+                with pd.HDFStore(filename) as store:
+                    for data in self.data.values():
+                        data.save(store, all=True)
+                    if self.name is not None:
+                        store.put(f"{self.name}/all_data", self.all_data)
+                        store.put(f"{self.name}/all_scores", self.all_scores)
+                    elif title is not None:
+                        store.put(f"projects/{title}/all_data", self.all_data)
+                        store.put(f"projects/{title}/all_scores", self.all_scores)
+                    else:
+                        store.put("all_data", self.all_data)
+                        store.put("all_scores", self.all_scores)
+            elif filename.lower().endswith(".pickle"):
+                with open(filename, "wb") as file:
+                    pickle.dump(self, file)
             else:
-                store.put("all_data", self.data)
-                store.put("all_scores", self.scores)
+                raise ValueError("filename must be a HDF5 or pickle file")
 
-    def saveAll(self, filename: str, title: str = None):
-        """Saves all the data to a HDF5 file
-
-        Args:
-            filename (str): The filename to save the data to
-        """
-        print(self.tabs, "Saving project:", self.name)
-        for expr in self.exprs.values():
-            expr.saveTrials(filename)
-        with pd.HDFStore(filename) as store:
-            if self.name is not None:
-                store.put(f"projects/{self.name}/data", self.data)
-                store.put(f"projects/{self.name}/scores", self.scores)
-            elif title is not None:
-                store.put(f"projects/{title}/data", self.data)
-                store.put(f"projects/{title}/scores", self.scores)
+        elif isinstance(filename, str):
+            if filename.lower().endswith(".h5"):
+                with pd.HDFStore(filename) as store:
+                    if self.name is not None:
+                        store.put(f"{self.name}/all_data", self.all_data)
+                        store.put(f"{self.name}/all_scores", self.all_scores)
+                    elif title is not None:
+                        store.put(f"projects/{title}/all_data", self.all_data)
+                        store.put(f"projects/{title}/all_scores", self.all_scores)
+                    else:
+                        store.put("all_data", self.all_data)
+                        store.put("all_scores", self.all_scores)
+            elif filename.lower().endswith(".pickle"):
+                with open(filename, "wb") as file:
+                    pickle.dump(self, file)
             else:
-                store.put("projects/all_data", self.data)
-                store.put("projects/all_scores", self.scores)
+                raise ValueError("filename must be a HDF5 or pickle file")
 
-    @property
-    def data(self) -> pd.DataFrame:
-        if len(self.all_data.index.levshape) == 3:
-            self.all_data.index.set_names(["Experiment", "Trial", "Trial_frame"], inplace=True)
-        elif len(self.all_data.index.levshape) == 1:
-            self.all_data.index.set_names(["Experiment"], inplace=True)
-
-        return self.all_data
-
-    @property
-    def scores(self) -> pd.DataFrame:
-        return self.all_scores
+        if isinstance(filename, pd.HDFStore):
+            store = filename
+            if self.name is not None:
+                store.put(f"{self.name}/all_data", self.all_data)
+                store.put(f"projects/{self.name}/all_scores", self.all_scores)
+            elif title is not None:
+                store.put(f"projects/{title}/all_data", self.all_data)
+                store.put(f"projects/{title}/all_scores", self.all_scores)
+            else:
+                store.put("all_data", self.all_data)
+                store.put("all_scores", self.all_scores)
 
     @property
     def quant_cols(self) -> list[str]:
@@ -393,7 +569,7 @@ class BaseType:
         Returns:
             list[str]: the columns from the data with the qualitative (or rather non-target) data.
         """
-        cols = self.data.reset_index().columns.to_list()
+        cols = self.all_data.reset_index().columns.to_list()
         cols = [i for i in cols if i not in self.quant_cols]
         return cols
 

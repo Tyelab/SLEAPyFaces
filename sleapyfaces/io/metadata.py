@@ -7,10 +7,10 @@ import json
 import ffmpeg
 
 @dataclass(slots=True)
-class BehMetadata:
+class ExprMetadata:
     """
     Summary:
-        Cache for JSON data.
+        Cache for experimental metadata data.
 
     Args:
         path (str of PathLike[str]): Path to the file containing the JSON data.
