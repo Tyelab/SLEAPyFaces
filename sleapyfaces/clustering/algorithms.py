@@ -7,21 +7,9 @@ from sklearn.pipeline import Pipeline
 
 
 class dataobjectprotocol(Protocol):
-    data: pd.DataFrame
-    cartesian: pd.DataFrame
-    polar: pd.DataFrame
-    scores: pd.DataFrame
-    calcData: pd.DataFrame
-    points: set[str]
-    cols: list[str]
-    cartesianCols: list[str]
-    polarCols: list[str]
-    classes: list[str]
-    basefeats: list[str]
+    all_data: pd.DataFrame
+    cols: tuple[list[str], list[str]]
 
-    @property
-    def all_data(self) -> pd.DataFrame:
-        pass
 
 class Cluster:
     """BETA: Clustering algorithm class
@@ -31,36 +19,23 @@ class Cluster:
         prediction_column (str): the prediction class (from FeatureExtractor.classes)
         pipeline (bool, optional): whether to use a sklearn pipeline. Defaults to False.
     """
-    def __init__(self, data: dataobjectprotocol, prediction_column: str, pipeline: bool = False):
+    def __init__(self, data: dataobjectprotocol, prediction_column: str):
         from sklearn.model_selection import train_test_split
+        from sklearn.preprocessing import MinMaxScaler
 
         print("Clustering...")
-        self.data = data.all_data
-        self.cols = data.cols
-        self.pred = prediction_column
-        self.pipeline = None
-        array, _ = self.data.columns.get_loc_level("Classes")
-        self.numCols = np.invert(array)
-        self.clusterData = self.data.loc[:, self.numCols]
-        self.predData = self.data.loc[:, ("Classes", self.pred)]
-        self.trainData, self.testData, self.trainLabels, self.testLabels = train_test_split(
-            self.clusterData, self.data.loc[:, ("Classes", self.pred)], test_size=0.3, random_state=12345
-        )
-        if pipeline:
-            from sklearn.decomposition import PCA
-            from sklearn.preprocessing import MaxAbsScaler
+        self._all_data = data.all_data
+        self.qual_cols, self.quant_cols = data.cols
 
-            self.pipeline = [
-                ('scaler', MaxAbsScaler()),
-                ('pca', PCA(n_components=len(data.points))),
-            ]
-            self.params = {
-                'pca__n_components': [i for i in range((len(data.points) * 2))],
-                'pca__whiten': [True, False],
-                'pca__svd_solver': ['auto', 'full', 'arpack', 'randomized']
-            }
-        else:
-            self.pipeline = None
+        self.pred = prediction_column
+        self.predData = self._all_data.loc[:, ("Classes", self.pred)]
+
+        self.clusterData = self._all_data.loc[:, self.quant_cols]
+        self.clusterData = MinMaxScaler().fit_transform(self.clusterData)
+
+        self.trainData, self.testData, self.trainLabels, self.testLabels = train_test_split(
+            self.clusterData, self._all_data.loc[:, ("Classes", self.pred)], test_size=0.3, random_state=12345
+        )
 
 
     def kmeans(self, output: bool = False, gridSearch: bool = False, *args, **kwargs):
@@ -77,8 +52,6 @@ class Cluster:
             n_clusters = 8
 
         kmeans = KMeans( *args, **kwargs)
-        if self.pipeline is not None:
-            kmeans = Pipeline([*self.pipeline, ('kmeans', kmeans)])
         if gridSearch:
             from sklearn.model_selection import GridSearchCV
             params = dict(**self.params, **{
@@ -112,8 +85,6 @@ class Cluster:
             n_clusters = 3
 
         ap = AffinityPropagation( *args, **kwargs)
-        if self.pipeline is not None:
-            ap = Pipeline([*self.pipeline, ('ap', ap)])
         if gridSearch:
             from sklearn.model_selection import GridSearchCV
             params = dict(**self.params, **{
@@ -130,7 +101,7 @@ class Cluster:
         if output:
             return ap
 
-    def hierarchical(self, output: bool = False,  *args, **kwargs):
+    def hierarchical(self, output: bool = False, *args, **kwargs):
         from sklearn.cluster import AgglomerativeClustering
         from sklearn.metrics import silhouette_score
 
@@ -144,8 +115,6 @@ class Cluster:
             n_clusters = 2
 
         hc = AgglomerativeClustering( *args, **kwargs)
-        if self.pipeline is not None:
-            hc = Pipeline([*self.pipeline, ('hc', hc)])
         hc.fit(self.clusterData)
         labels = None
         if hasattr(hc, "labels_"):
@@ -289,3 +258,11 @@ class Cluster:
 
         if output:
             return knn_model
+
+    @property
+    def all_data(self):
+        return self.clusterData.merge(self._all_data[self.qual_cols])
+
+    @property
+    def cols(self):
+        return self.qual_cols, [col for col in self.clusterData.columns if col not in self.qual_cols]

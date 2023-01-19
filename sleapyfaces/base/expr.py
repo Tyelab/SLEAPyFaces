@@ -64,8 +64,8 @@ class Experiment(BaseType):
             VideoFile=File(self.base, *self.VideoFile),
         )
         logging.info("=========================================")
-        logging.info(self.tabs, "Initializing Experiment...")
-        logging.debug(self.tabs + "\t", "Path:", self.files.sleap.basepath)
+        logging.info(f"{self.tabs}Initializing Experiment...")
+        logging.debug(f"{self.tabs}\tPath:{self.files.sleap.basepath}")
         logging.info("=========================================")
 
         self.sleap = SLEAPData(self.files.sleap.file, tabs=self.tabs + "\t")
@@ -94,7 +94,8 @@ class Experiment(BaseType):
             sleap.tracks (pd.DataFrame): The SLEAP data.
             custom_columns (pd.DataFrame): The non-numeric columns.
         """
-        logging.info(self.tabs, "Building columns for experiment:", self.name)
+        logging.info(f"{self.tabs}Building columns for experiment: {self.name}")
+
         if CustomColumns is None:
             CustomColumns = []
         self.custom_columns = [0] * (len(self.sleap.tracks.index) + len(CustomColumns))
@@ -160,7 +161,8 @@ class Experiment(BaseType):
                 trials (pd.DataFrame): the dataframe with the data in trial by 	trial format, with a metaindex of trial number and frame number
                 trialData (list[pd.DataFrame]): a list of the dataframes with the individual trial data.
         """
-        logging.info(self.tabs, "Building trials for experiment:", self.name)
+        logging.info(f"{self.tabs}Building trials for experiment: {self.name}")
+
         if len(Reduced) != len(TrackedData):
             raise ValueError(
                 "The number of Reduced arguments must be equal to the number of TrackedData arguments. NOTE: If you do not want to reduce the data, pass in a list of False values."
@@ -244,7 +246,8 @@ class Experiment(BaseType):
         Args:
             filename (str): the file to save the HDF5 data to.
         """
-        logging.debug(self.tabs, "Saving experiment:", self.name)
+        logging.debug(f"{self.tabs}Saving experiment:{self.name}")
+
         with pd.HDFStore(filename) as store:
             store.put(f"{self.name}/trials", self.all_data, format="table", data_columns=True)
             for i, trial in enumerate(self.all_trials):
@@ -302,7 +305,8 @@ class Experiment(BaseType):
         Updates attributes:
             all_data (pd.DataFrame): the normaized data for all experiments concatenated together
         """
-        logging.debug(self.tabs, "Normalizing experiment:", self.name)
+        logging.debug(f"{self.tabs}Normalizing experiment: {self.name}")
+
         self.all_data = z_score(
                             pd.concat(
                                 [

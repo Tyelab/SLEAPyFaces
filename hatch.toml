@@ -37,7 +37,12 @@ dependencies = [
     "statsmodels",
     "seaborn",
     "geomstats",
-	"plotly"
+    "plotly",
+    "pathvalidate",
+    "pickle",
+    "itertools",
+    "python-configuration",
+    "logging"
 ]
 
 [envs.default.scripts]

@@ -201,7 +201,7 @@ class BaseType:
                 self.prefix = self.config["Prefixes"][self.sublevel]
 
         if self.fileStruct is None:
-            self.fileStruct = self._init_file_structure(self.base, prefix)
+            self.fileStruct = self._init_file_structure(self.base, self.prefix)
 
         if self.fileStruct is not None and self.fileStruct is not False:
             self.names: list[str] = list(self.fileStruct.keys())
@@ -273,14 +273,17 @@ class BaseType:
         )
         return configuration
 
-    def _init_file_structure(self, base, prefix: str = None) -> dict[str, any]:
+    def _init_file_structure(self, base: str = None, prefix: str = None) -> dict[str, any]:
         iterator = {}
         subdirs = os.listdir(base)
         subdirs = [
             subdir for subdir in subdirs if os.path.isdir(os.path.join(base, subdir))
         ]
         subdirs.sort()
-        if prefix is not None:
+        if self.prefix is not None:
+            for i, subdir in enumerate(subdirs):
+                iterator[f"{self.prefix}_{i}"] = subdir
+        elif prefix is not None:
             for i, subdir in enumerate(subdirs):
                 iterator[f"{prefix}_{i}"] = subdir
         else:
@@ -324,7 +327,7 @@ class BaseType:
                 self.custom_columns = columns
                 data.buildColumns(self.custom_columns)
         else:
-            logging.debug(self.tabs, [(col, val) for col, val in zip(columns, values)])
+            logging.debug(f"{self.tabs}{[(col, val) for col, val in zip(columns, values)]}")
             self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
             for data in self.data.values():
                 data.buildColumns(self.custom_columns)
@@ -425,7 +428,7 @@ class BaseType:
             all_data (pd.DataFrame): the normaized data for all experiments concatenated together
         """
 
-        logging.info(self.tabs, "Normalizing project", self.name)
+        logging.info(f"{self.tabs}Normalizing project {self.name if self.name is not None else ''}")
 
         for data in self.data.values():
                 data.normalize()
