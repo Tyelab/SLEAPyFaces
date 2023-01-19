@@ -35,7 +35,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-      "click",
+    "click",
     "pytest",
     "pytest-cov",
     "pandas",
@@ -52,10 +52,8 @@ dependencies = [
     "geomstats",
     "plotly",
     "pathvalidate",
-    "pickle",
-    "itertools",
-    "python-configuration",
-    "logging"
+    "more-itertools",
+    "python-configuration"
 ]
 dynamic = ["version"]
 

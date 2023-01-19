@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022-present Annie Ehler <annie.ehler.4@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-__version__ = "1.2.0-beta2.dev8"
+__version__ = "1.2.0-beta2.dev10"
 __author__ = "Analetta (Annie) Ehler"
 __author_email__ = "annie.ehler.4@gmail.com"
 __license__ = "MIT"

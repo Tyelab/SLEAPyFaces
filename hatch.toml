@@ -39,10 +39,8 @@ dependencies = [
     "geomstats",
     "plotly",
     "pathvalidate",
-    "pickle",
-    "itertools",
-    "python-configuration",
-    "logging"
+    "more-itertools",
+    "python-configuration"
 ]
 
 [envs.default.scripts]
