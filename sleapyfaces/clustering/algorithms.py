@@ -23,7 +23,7 @@ class Cluster:
         from sklearn.model_selection import train_test_split
         from sklearn.preprocessing import MinMaxScaler
 
-        print("Clustering...")
+        self.cluster_data = pd.DataFrame()
         self._all_data = data.all_data
         self.qual_cols, self.quant_cols = data.cols
 
@@ -67,7 +67,7 @@ class Cluster:
         labels = kmeans.predict(self.clusterData)
         print(f'Silhouette Score(n={n_clusters}): {silhouette_score(self.clusterData, labels)}')
         clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["KMeans"]]))
-        self.data = pd.concat([self.data, clusters.T], axis=1)
+        self.cluster_data = pd.concat([self.cluster_data, clusters.T], axis=1)
         if output:
             return kmeans
 
