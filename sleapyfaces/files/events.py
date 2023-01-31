@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from os import PathLike
 import pandas as pd
 from io import FileIO
+
 
 @dataclass(slots=True)
 class EventsData:
@@ -47,7 +50,8 @@ class EventsData:
         elif len(list) == len(self.cache.iloc[0, :]):
             self.cache.columns = value
         else:
-            raise ValueError("Length of list does not match length of cached data.")
+            raise ValueError(
+                "Length of list does not match length of cached data.")
 
     def saveData(self, filename: str | PathLike[str] | FileIO) -> None:
         """saves the cached data to a csv file

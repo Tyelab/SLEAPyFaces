@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from os import PathLike
 import pandas as pd
@@ -5,6 +7,7 @@ from io import FileIO
 from sleapyfaces.utils.io import json_dumps
 import json
 import ffmpeg
+
 
 @dataclass(slots=True)
 class ExprMetadata:

@@ -36,7 +36,7 @@ default_config = {
         "start_buffer": 10000,
         "end_buffer": 13000
     },
-    "ExperimentEvents" : "columns",
+    "ExperimentEvents": "columns",
     "SLEAP": "datasets",
     "Video": "metadata",
     "ExperimentSetup": {
@@ -48,6 +48,7 @@ default_config = {
         "filename": None,
     }
 }
+
 
 def set_config(*args, **kwargs) -> ConfigurationSet:
     """Initializes the config file for the project
@@ -76,13 +77,15 @@ def set_config(*args, **kwargs) -> ConfigurationSet:
             elif pathlib.Path(arg).suffix in ["ini", "INI"]:
                 configs.append(('ini', arg, True))
             else:
-                raise ValueError(f"Invalid config file type: {arg} \nMust be one of [json, yaml, yml, toml, tml, ini]")
+                raise ValueError(
+                    f"Invalid config file type: {arg} \nMust be one of [json, yaml, yml, toml, tml, ini]")
         elif isinstance(arg, dict):
             configs.append(('dict', arg))
         elif isinstance(arg, str) and arg.isupper():
             configs.append(('env', arg, kwargs.get("config_separator", "__")))
         elif isinstance(arg, str) and not arg.isalnum():
-            configs.append(('env', kwargs.get("config_prefix", "sleapyfaces"), arg))
+            configs.append(
+                ('env', kwargs.get("config_prefix", "sleapyfaces"), arg))
         elif isinstance(arg, bool):
             interpolate_config = arg
 
@@ -90,7 +93,7 @@ def set_config(*args, **kwargs) -> ConfigurationSet:
     configuration = config(*configs, interpolate=interpolate_config)
 
     logging.basicConfig(
-        filename = configuration["Logging"]["filename"],
+        filename=configuration["Logging"]["filename"],
         format=configuration["Logging"]["format"],
         level=configuration["Logging"]["level"]
     )
