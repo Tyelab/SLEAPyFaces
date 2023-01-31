@@ -1,19 +1,18 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from os import PathLike
-import pandas as pd
-import numpy as np
-from sleapyfaces.utils.io import (
-    save_dict_to_hdf5,
-    save_dt_to_hdf5,
-)
-from sleapyfaces.utils.reform import (
-    fill_missing,
-    tracks_deconstructor
-)
-import h5py as h5
 
-@dataclass(slots=True)
-class SLEAPanalysis:
+import h5py as h5
+import numpy as np
+import pandas as pd
+
+from sleapyfaces.utils.io import save_dict_to_hdf5, save_dt_to_hdf5
+from sleapyfaces.utils.reform import fill_missing, tracks_deconstructor
+
+
+@dataclass
+class SLEAPData:
     """
     Summary:
         a class for reading and storing SLEAP analysis files
@@ -85,7 +84,9 @@ class SLEAPanalysis:
             self.tracks = tracks_deconstructor(
                 self.data["tracks"], self.data["node_names"]
             )
-            self.scores = pd.DataFrame(np.squeeze(self.data.get('point_scores')), columns=self.nodes)
+            self.scores = pd.DataFrame(
+                np.squeeze(self.data.get("point_scores")), columns=self.nodes
+            )
 
     def getTrackNames(self) -> None:
         """gets the track names from the SLEAP analysis file

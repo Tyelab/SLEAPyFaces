@@ -1,30 +1,18 @@
-from sleapyfaces.utils.graph import (
-    cartesian_to_polar,
-    euclidean_distance,
-    polar,
-)
+from sleapyfaces.utils.graph import cartesian_to_polar, euclidean_distance, polar
 from sleapyfaces.utils.io import (
-    json_loads,
     json_dumps,
-    save_dt_to_hdf5,
+    json_loads,
     save_dict_to_hdf5,
+    save_dt_to_hdf5,
 )
-from sleapyfaces.utils.normalize import (
-    mean_center,
-    z_score,
-    pca,
-)
+from sleapyfaces.utils.normalize import mean_center, pca, z_score
 from sleapyfaces.utils.reform import (
-    fill_missing,
-    smooth_diff,
     corr_roll,
+    fill_missing,
+    flatten_list,
     into_trial_format,
     reduce_daq,
+    smooth_diff,
     tracks_deconstructor,
-    flatten_list
 )
-from sleapyfaces.utils.structs import (
-    File,
-    FileConstructor,
-    CustomColumn
-)
+from sleapyfaces.utils.structs import CustomColumn, File, FileConstructor

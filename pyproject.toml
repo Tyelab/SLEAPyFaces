@@ -35,22 +35,25 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-  "click",
-  "pytest",
-  "pytest-cov",
-  "pandas",
-  "numpy",
-  "scipy",
-  "scikit-learn",
-  "tables",
-  "ffmpeg-python",
-  "h5py",
-  "python-rapidjson",
-  "matplotlib",
-  "statsmodels",
-  "seaborn",
-  "geomstats",
-  "plotly"
+    "click",
+    "pytest",
+    "pytest-cov",
+    "pandas",
+    "numpy",
+    "scipy",
+    "scikit-learn",
+    "tables",
+    "ffmpeg-python",
+    "h5py",
+    "python-rapidjson",
+    "matplotlib",
+    "statsmodels",
+    "seaborn",
+    "geomstats",
+    "plotly",
+    "pathvalidate",
+    "more-itertools",
+    "python-configuration"
 ]
 dynamic = ["version"]
 

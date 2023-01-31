@@ -1,13 +1,17 @@
-from dataclasses import dataclass
-from os import PathLike
-import pandas as pd
-from io import FileIO
+from __future__ import annotations
 
-@dataclass(slots=True)
-class DAQData:
+from dataclasses import dataclass
+from io import FileIO
+from os import PathLike
+
+import pandas as pd
+
+
+@dataclass
+class EventsData:
     """
     Summary:
-        Cache for DAQ data.
+        Cache for DAQ events data.
 
     Attrs:
         path (Text or PathLike[Text]): Path to the directory containing the DAQ data.

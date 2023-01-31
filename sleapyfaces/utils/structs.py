@@ -1,11 +1,14 @@
+from __future__ import annotations
+
+import glob
+import os
 from dataclasses import dataclass
 from os import PathLike
-import os
-import glob
+
 import pandas as pd
 
 
-@dataclass(slots=True)
+@dataclass
 class File:
     """A structured file object that contains the base path and filename of a file.
 
@@ -29,7 +32,11 @@ class File:
         self.filename = filename
         self.get_glob = get_glob
 
-        self.file = glob.glob(os.path.join(self.basepath, self.filename)) if self.get_glob else os.path.join(self.basepath, self.filename)
+        self.file = (
+            glob.glob(os.path.join(self.basepath, self.filename))
+            if self.get_glob
+            else os.path.join(self.basepath, self.filename)
+        )
         self.file = self.file[0] if type(self.file) is list else self.file
 
     def iPath(self, i: int) -> str:
@@ -37,39 +44,43 @@ class File:
         return "/".join(self.file.split("/")[:-i])
 
 
-@dataclass(slots=True)
+@dataclass
 class FileConstructor:
 
     """Takes in the base paths and filenames of the experimental data and returns them as a structured object.
 
     Args:
-        DAQFile (File): The location of the DAQ data file.
+        ExperimentEventsFile (File): The location of the file with the experimental events.
         SLEAPFile (File): The location of the SLEAP analysis file.
-        BehFile (File): The location of the behavioral metadata file.
+        ExperimentSetupFile (File): The location of the experimental metadata file.
         VideoFile (File): The location of the video file.
 
     Attributes:
-        daq (File): The location of the DAQ file as a structured File object.
+        events (File): The location of the DAQ file as a structured File object.
         sleap (File): The location of the SLEAP analysis file as a structured File object.
-        beh (File): The location of the behavioral metadata file as a structured File object.
+        setup (File): The location of the behavioral metadata file as a structured File object.
         video (File): The location of the video file as a structured File object.
     """
 
-    daq: File
+    events: File
     sleap: File
-    beh: File
+    setup: File
     video: File
 
     def __init__(
-        self, daq_file: File, sleap_file: File, beh_file: File, video_file: File
+        self,
+        ExperimentEventsFile: File,
+        SLEAPFile: File,
+        ExperimentSetupFile: File,
+        VideoFile: File,
     ) -> None:
-        self.daq = daq_file
-        self.sleap = sleap_file
-        self.beh = beh_file
-        self.video = video_file
+        self.events = ExperimentEventsFile
+        self.sleap = SLEAPFile
+        self.setup = ExperimentSetupFile
+        self.video = VideoFile
 
 
-@dataclass(slots=True)
+@dataclass
 class CustomColumn:
     """Builds an annotation column for the base dataframe.
 

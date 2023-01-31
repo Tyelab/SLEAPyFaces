@@ -1,6 +1,7 @@
+import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-import numpy as np
+
 
 def mean_center(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
     """Mean center the data.
@@ -32,7 +33,9 @@ def z_score(data: pd.DataFrame, track_names: list[str]) -> pd.DataFrame:
     return data
 
 
-def pca(data: pd.DataFrame, track_names: list[str], multiindex: bool = None, *args, **kwargs) -> dict[str, pd.DataFrame]:
+def pca(
+    data: pd.DataFrame, track_names: list[str], multiindex: bool = None, *args, **kwargs
+) -> dict[str, pd.DataFrame]:
     """Runs 2D and 3D PCA dimensionality reduction on the data.
 
     Args:
@@ -72,13 +75,22 @@ def pca(data: pd.DataFrame, track_names: list[str], multiindex: bool = None, *ar
     )
 
     if multiindex:
-        num_data_2d.columns = pd.MultiIndex.from_product([["PCA-2D"], num_data_2d.columns])
-        num_data_3d.columns = pd.MultiIndex.from_product([["PCA-3D"], num_data_3d.columns])
+        num_data_2d.columns = pd.MultiIndex.from_product(
+            [["PCA-2D"], num_data_2d.columns]
+        )
+        num_data_3d.columns = pd.MultiIndex.from_product(
+            [["PCA-3D"], num_data_3d.columns]
+        )
 
-    pcas["pca2d"] = pd.concat([qual_data.reset_index( *args, **kwargs), num_data_2d], axis=1)
-    pcas["pca3d"] = pd.concat([qual_data.reset_index( *args, **kwargs), num_data_3d], axis=1)
+    pcas["pca2d"] = pd.concat(
+        [qual_data.reset_index(*args, **kwargs), num_data_2d], axis=1
+    )
+    pcas["pca3d"] = pd.concat(
+        [qual_data.reset_index(*args, **kwargs), num_data_3d], axis=1
+    )
 
     return pcas
+
 
 # create gaussian kernel for smoothing
 def gaussian_kernel(window_size: int, sigma=1) -> np.ndarray:

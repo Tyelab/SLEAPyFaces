@@ -1,16 +1,21 @@
-from dataclasses import dataclass
-from os import PathLike
-import pandas as pd
-from io import FileIO
-from sleapyfaces.utils.io import json_dumps
-import json
-import ffmpeg
+from __future__ import annotations
 
-@dataclass(slots=True)
-class BehMetadata:
+import json
+from dataclasses import dataclass
+from io import FileIO
+from os import PathLike
+
+import ffmpeg
+import pandas as pd
+
+from sleapyfaces.utils.io import json_dumps
+
+
+@dataclass
+class ExprMetadata:
     """
     Summary:
-        Cache for JSON data.
+        Cache for experimental metadata data.
 
     Args:
         path (str of PathLike[str]): Path to the file containing the JSON data.
@@ -78,7 +83,7 @@ class BehMetadata:
             self.cache.to_csv(f"{filename}.csv", index=True)
 
 
-@dataclass(slots=True)
+@dataclass
 class VideoMetadata:
     """
     Summary:
