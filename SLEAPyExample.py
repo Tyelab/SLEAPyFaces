@@ -13,9 +13,9 @@
 # ---
 
 # %%
-from sleapyfaces import Experiment
+from sleapyfaces.base import Experiment
 
-ecpr = Experiment(
+expr = Experiment(
 )
 
 # %%
