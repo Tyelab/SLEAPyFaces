@@ -1,11 +1,11 @@
-import os
 import logging
+import os
 
 import pandas as pd
+from config.configuration_set import ConfigurationSet
 
 from sleapyfaces.base.expr import Experiment
 from sleapyfaces.base.type import BaseType
-from config.configuration_set import ConfigurationSet
 
 
 class Project(BaseType):
@@ -38,7 +38,8 @@ class Project(BaseType):
         passed_config: ConfigurationSet = None,
         prefix: str = None,
         *args,
-        **kwargs) -> None:
+        **kwargs,
+    ) -> None:
 
         super().__init__(
             ExperimentEventsFile=ExperimentEventsFile,
@@ -53,12 +54,14 @@ class Project(BaseType):
             sublevel=sublevel,
             prefix=prefix,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def _init_data(self):
         logging.info("=========================================")
-        logging.info(f"{self.tabs}Initializing Project...{self.name if self.name is not None else ''}")
+        logging.info(
+            f"{self.tabs}Initializing Project...{self.name if self.name is not None else ''}"
+        )
         logging.info(f"{self.tabs}\tPath:{self.base}")
         logging.info("=========================================")
         logging.debug("=========================================")
@@ -83,11 +86,15 @@ class Project(BaseType):
                 VideoFile=self.VideoFile,
                 passed_config=self.config,
                 sublevel=None,
-                tabs=self.tabs+"\t"
+                tabs=self.tabs + "\t",
             )
         self.numeric_columns: list[str] = self.data[self.names[0]].numeric_columns
-        self.all_data: pd.DataFrame = pd.concat([data.all_data for data in self.data.values()], keys=self.names)
-        self.all_scores: pd.DataFrame = pd.concat([data.all_scores for data in self.data.values()], keys=self.names)
+        self.all_data: pd.DataFrame = pd.concat(
+            [data.all_data for data in self.data.values()], keys=self.names
+        )
+        self.all_scores: pd.DataFrame = pd.concat(
+            [data.all_scores for data in self.data.values()], keys=self.names
+        )
 
     def _rename_index(self, df: pd.DataFrame) -> pd.DataFrame:
         df.index.names = ["Experiment", "Trial", "Trial_index"]

@@ -2,20 +2,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from os import PathLike
-import pandas as pd
-import numpy as np
-from sleapyfaces.utils.io import (
-    save_dict_to_hdf5,
-    save_dt_to_hdf5,
-)
-from sleapyfaces.utils.reform import (
-    fill_missing,
-    tracks_deconstructor
-)
+
 import h5py as h5
+import numpy as np
+import pandas as pd
+
+from sleapyfaces.utils.io import save_dict_to_hdf5, save_dt_to_hdf5
+from sleapyfaces.utils.reform import fill_missing, tracks_deconstructor
 
 
-@dataclass(slots=True)
+@dataclass
 class SLEAPData:
     """
     Summary:
@@ -70,8 +66,7 @@ class SLEAPData:
                 elif dataset == "tracks":
                     self.data[dataset] = fill_missing(f[dataset][:].T)
                 elif "name" in dataset:
-                    self.data[dataset] = [n.decode()
-                                          for n in f[dataset][:].flatten()]
+                    self.data[dataset] = [n.decode() for n in f[dataset][:].flatten()]
                 else:
                     self.data[dataset] = f[dataset][:].T
 
@@ -85,13 +80,13 @@ class SLEAPData:
         if len(self.data.values()) == 0:
             raise ValueError("No data has been loaded.")
         else:
-            self.nodes = [name.replace(" ", "_")
-                          for name in self.data["node_names"]]
+            self.nodes = [name.replace(" ", "_") for name in self.data["node_names"]]
             self.tracks = tracks_deconstructor(
                 self.data["tracks"], self.data["node_names"]
             )
-            self.scores = pd.DataFrame(np.squeeze(
-                self.data.get('point_scores')), columns=self.nodes)
+            self.scores = pd.DataFrame(
+                np.squeeze(self.data.get("point_scores")), columns=self.nodes
+            )
 
     def getTrackNames(self) -> None:
         """gets the track names from the SLEAP analysis file
@@ -101,8 +96,7 @@ class SLEAPData:
         """
         self.track_names = [0] * (len(self.data["node_names"]) * 2)
         for name, i in zip(
-            self.data["node_names"], range(
-                0, (len(self.data["node_names"]) * 2), 2)
+            self.data["node_names"], range(0, (len(self.data["node_names"]) * 2), 2)
         ):
             self.track_names[i] = f"{name.replace(' ', '_')}_x"
             self.track_names[i + 1] = f"{name.replace(' ', '_')}_y"
@@ -123,8 +117,7 @@ class SLEAPData:
         if len(item.index) == len(self.tracks.index):
             self.tracks = pd.concat([self.tracks, item], axis=1)
         else:
-            raise ValueError(
-                "Length of list does not match length of cached data.")
+            raise ValueError("Length of list does not match length of cached data.")
 
     def saveData(self, filename: str | PathLike[str], path="SLEAP") -> None:
         """saves the SLEAP analysis data to an HDF5 file

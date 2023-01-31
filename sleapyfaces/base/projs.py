@@ -1,11 +1,10 @@
+import logging
 import os
 
 import pandas as pd
 
 from sleapyfaces.base.proj import Project
 from sleapyfaces.base.type import BaseType
-
-import logging
 
 
 class Projects(BaseType):
@@ -23,7 +22,9 @@ class Projects(BaseType):
             NOTE: if glob is True, make sure to include the file extension in the naming convention
         name (str): Name of the project (e.g. "CSE009")
     """
-    def __init__(self,
+
+    def __init__(
+        self,
         ExperimentEventsFile: tuple[str, bool] | str,
         ExperimentSetupFile: tuple[str, bool] | str,
         SLEAPFile: tuple[str, bool],
@@ -34,7 +35,8 @@ class Projects(BaseType):
         tabs: str = "",
         sublevel: str = "Project",
         *args,
-        **kwargs) -> None:
+        **kwargs,
+    ) -> None:
         """A class to handle multiple projects"""
 
         super().__init__(
@@ -48,7 +50,7 @@ class Projects(BaseType):
             tabs=tabs,
             sublevel=sublevel,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def _init_data(self):
@@ -78,11 +80,15 @@ class Projects(BaseType):
                 tabs=self.tabs + "\t",
                 passed_config=self.config,
                 sublevel="Experiment",
-                prefix="week"
+                prefix="week",
             )
         self.numeric_columns = self.data[self.names[0]].numeric_columns
-        self.all_data = pd.concat([data.all_data for data in self.data.values()], keys=self.names)
-        self.all_scores = pd.concat([data.all_scores for data in self.data.values()], keys=self.names)
+        self.all_data = pd.concat(
+            [data.all_data for data in self.data.values()], keys=self.names
+        )
+        self.all_scores = pd.concat(
+            [data.all_scores for data in self.data.values()], keys=self.names
+        )
 
     def _rename_index(self, df: pd.DataFrame) -> pd.DataFrame:
         df.index.names = ["Project", "Experiment", "Trial", "Trial_index"]

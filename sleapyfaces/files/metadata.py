@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from os import PathLike
-import pandas as pd
-from io import FileIO
-from sleapyfaces.utils.io import json_dumps
 import json
+from dataclasses import dataclass
+from io import FileIO
+from os import PathLike
+
 import ffmpeg
+import pandas as pd
+
+from sleapyfaces.utils.io import json_dumps
 
 
-@dataclass(slots=True)
+@dataclass
 class ExprMetadata:
     """
     Summary:
@@ -81,7 +83,7 @@ class ExprMetadata:
             self.cache.to_csv(f"{filename}.csv", index=True)
 
 
-@dataclass(slots=True)
+@dataclass
 class VideoMetadata:
     """
     Summary:

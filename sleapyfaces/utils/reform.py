@@ -1,8 +1,10 @@
+from typing import List, MutableSequence, Sequence
+
 import numpy as np
 import pandas as pd
-from scipy.signal import savgol_filter
 from scipy.interpolate import interp1d
-from typing import List, Sequence, MutableSequence
+from scipy.signal import savgol_filter
+
 
 def fill_missing(Y, kind="linear") -> np.ndarray:
     """
@@ -148,6 +150,7 @@ def into_trial_format(
             axis=1,
         )
     return var_trials
+
 
 def reduce_daq(iterable: list, ms=4000) -> list[float]:
     """

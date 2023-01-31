@@ -21,6 +21,7 @@ Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
 
 from functools import wraps
 
+
 class DocInherit(object):
     """
     Docstring inheriting method descriptor

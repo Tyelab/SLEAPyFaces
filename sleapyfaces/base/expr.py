@@ -1,15 +1,15 @@
-import warnings
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
+from config.configuration_set import ConfigurationSet
 
-from sleapyfaces.files import ExprMetadata, EventsData, SLEAPData, VideoMetadata
+from sleapyfaces.base.type import BaseType
+from sleapyfaces.files import EventsData, ExprMetadata, SLEAPData, VideoMetadata
 from sleapyfaces.utils import flatten_list, into_trial_format, reduce_daq
 from sleapyfaces.utils.normalize import mean_center, z_score
-from sleapyfaces.utils.structs import CustomColumn, FileConstructor, File
-from sleapyfaces.base.type import BaseType
-from config.configuration_set import ConfigurationSet
+from sleapyfaces.utils.structs import CustomColumn, File, FileConstructor
 
 
 class Experiment(BaseType):
@@ -28,19 +28,21 @@ class Experiment(BaseType):
         daq (DAQData): The DAQData object containing the DAQ data.
         numeric_columns (list[str]): A list of the titles of the numeric columns in the SLEAP data.
     """
-    def __init__(self,
-            name: str,
-            base: str,
-            ExperimentEventsFile: tuple[str, bool] | str = None,
-            ExperimentSetupFile: tuple[str, bool] | str = None,
-            SLEAPFile: tuple[str, bool] | str = None,
-            VideoFile: tuple[str, bool] | str = None,
-            tabs: str = "",
-            passed_config: dict[str, any] | ConfigurationSet = None,
-            prefix: str = None,
-            file_structure: dict | bool = False,
-            sublevel: str = None,
-         ):
+
+    def __init__(
+        self,
+        name: str,
+        base: str,
+        ExperimentEventsFile: tuple[str, bool] | str = None,
+        ExperimentSetupFile: tuple[str, bool] | str = None,
+        SLEAPFile: tuple[str, bool] | str = None,
+        VideoFile: tuple[str, bool] | str = None,
+        tabs: str = "",
+        passed_config: dict[str, any] | ConfigurationSet = None,
+        prefix: str = None,
+        file_structure: dict | bool = False,
+        sublevel: str = None,
+    ):
 
         super().__init__(
             name=name,
@@ -53,7 +55,7 @@ class Experiment(BaseType):
             tabs=tabs,
             passed_config=passed_config,
             prefix=prefix,
-            sublevel=sublevel
+            sublevel=sublevel,
         )
 
     def _init_data(self):
@@ -137,7 +139,9 @@ class Experiment(BaseType):
             elif isinstance(item, pd.DataFrame):
                 self.custom_columns.append(item.index)
         else:
-            raise TypeError("The item to be appended must be a pandas series or dataframe.")
+            raise TypeError(
+                "The item to be appended must be a pandas series or dataframe."
+            )
 
     def buildTrials(
         self,
@@ -231,7 +235,8 @@ class Experiment(BaseType):
         self.trial_scores = [i for i in self.trial_scores if type(i) is pd.DataFrame]
         if len(self.all_trials) != len(self.trial_scores):
             warnings.warn(
-                "The number of trial dataframes does not match the number of trial score dataframes.", RuntimeWarning
+                "The number of trial dataframes does not match the number of trial score dataframes.",
+                RuntimeWarning,
             )
         self.all_data = pd.concat(
             self.all_trials, axis=0, keys=[i for i in range(len(self.all_trials))]
@@ -250,9 +255,16 @@ class Experiment(BaseType):
         logging.debug(f"{self.tabs}Saving experiment:{self.name}")
 
         with pd.HDFStore(filename) as store:
-            store.put(f"{self.name}/trials", self.all_data, format="table", data_columns=True)
+            store.put(
+                f"{self.name}/trials", self.all_data, format="table", data_columns=True
+            )
             for i, trial in enumerate(self.all_trials):
-                store.put(f"{self.name}/trialData/trial{i}", trial, format="table", data_columns=True)
+                store.put(
+                    f"{self.name}/trialData/trial{i}",
+                    trial,
+                    format="table",
+                    data_columns=True,
+                )
 
     def meanCenter(self, alldata: bool = False):
         """Recursively mean centers the data for each trial for each experiment
@@ -264,17 +276,16 @@ class Experiment(BaseType):
             self.all_data = mean_center(self.all_data, self.numeric_columns)
         else:
             self.all_data = mean_center(
-                            pd.concat(
-                                [
-                                    mean_center(
-                                        trial, self.numeric_columns
-                                    ) for trial in self.all_trials
-                                ],
-                                axis=0,
-                                keys=range(len(self.all_trials)),
-                            ),
-                            self.numeric_columns
-                        )
+                pd.concat(
+                    [
+                        mean_center(trial, self.numeric_columns)
+                        for trial in self.all_trials
+                    ],
+                    axis=0,
+                    keys=range(len(self.all_trials)),
+                ),
+                self.numeric_columns,
+            )
             self.all_data.index.names = ["Trial", "Trial_index"]
 
     def zScore(self, alldata: bool = False):
@@ -287,17 +298,13 @@ class Experiment(BaseType):
             self.all_data = z_score(self.all_data, self.numeric_columns)
         else:
             self.all_data = z_score(
-                            pd.concat(
-                                [
-                                    z_score(
-                                        trial, self.numeric_columns
-                                    ) for trial in self.all_trials
-                                ],
-                                axis=0,
-                                keys=range(len(self.all_trials)),
-                            ),
-                            self.numeric_columns
-                        )
+                pd.concat(
+                    [z_score(trial, self.numeric_columns) for trial in self.all_trials],
+                    axis=0,
+                    keys=range(len(self.all_trials)),
+                ),
+                self.numeric_columns,
+            )
             self.all_data.index.names = ["Trial", "Trial_index"]
 
     def normalize(self):
@@ -309,15 +316,11 @@ class Experiment(BaseType):
         logging.debug(f"{self.tabs}Normalizing experiment: {self.name}")
 
         self.all_data = z_score(
-                            pd.concat(
-                                [
-                                    mean_center(
-                                        trial, self.numeric_columns
-                                    ) for trial in self.all_trials
-                                ],
-                                axis=0,
-                                keys=range(len(self.all_trials)),
-                            ),
-                            self.numeric_columns
-                        )
+            pd.concat(
+                [mean_center(trial, self.numeric_columns) for trial in self.all_trials],
+                axis=0,
+                keys=range(len(self.all_trials)),
+            ),
+            self.numeric_columns,
+        )
         self.all_data.index.names = ["Trial", "Trial_index"]

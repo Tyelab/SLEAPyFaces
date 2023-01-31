@@ -1,16 +1,19 @@
-from sleapyfaces.utils.structs import CustomColumn
-from sleapyfaces.utils.normalize import mean_center, pca, z_score
-import os
-from config import config
-from config.configuration_set import ConfigurationSet
-import logging
 import itertools
+import logging
+import os
+import pickle
 from typing import Protocol
-from pathvalidate._filename import is_valid_filename
+
 import pandas as pd
 import plotly.graph_objects as go
-import pickle
+from config import config
+from config.configuration_set import ConfigurationSet
+from pathvalidate._filename import is_valid_filename
+
 from sleapyfaces.config import set_config
+from sleapyfaces.utils.normalize import mean_center, pca, z_score
+from sleapyfaces.utils.structs import CustomColumn
+
 
 class objdict(dict):
     def __init__(self, *args, **kwargs):
@@ -31,10 +34,12 @@ class objdict(dict):
         else:
             raise AttributeError("No such attribute: " + name)
 
+
 def all_equal(iterable):
     "Returns True if all the elements are equal to each other"
     g = itertools.groupby(iterable)
     return next(g, True) and not next(g, False)
+
 
 class DataClassProtocol(Protocol):
     base: str
@@ -69,7 +74,8 @@ class DataClassProtocol(Protocol):
         passed_config: dict[str, any] = None,
         prefix: str = None,
         *args,
-        **kwargs) -> None:
+        **kwargs,
+    ) -> None:
 
         self.base = base
         self.name = name
@@ -83,20 +89,28 @@ class DataClassProtocol(Protocol):
 
     def buildColumns(self, columns: list = None, values: list = None):
         pass
+
     def buildTrials(self, trials: list = None, values: list = None):
         pass
+
     def meanCenter(self, alldata: bool = False):
         pass
+
     def zScore(self, alldata: bool = False):
         pass
+
     def normalize(self, alldata: bool = False):
         pass
+
     def pca(self, alldata: bool = False):
         pass
+
     def visualize(self, alldata: bool = False):
         pass
+
     def save(self, filename: str | pd.HDFStore, title: str = None, all: bool = False):
         pass
+
 
 class BaseType:
     """Base type for project/experiment/projects
@@ -112,8 +126,8 @@ class BaseType:
         prefix (str): the prefix to use for the project/experiment (e.g. "week") in the dataframes
         *args, **kwargs: Configuration args
 
-		Configuration Args:
-			FilePath (str): The full filepath to the configuration file or the relative path to the current working directory without a leading slash
+                Configuration Args:
+                        FilePath (str): The full filepath to the configuration file or the relative path to the current working directory without a leading slash
 
 
     """
@@ -132,7 +146,8 @@ class BaseType:
         prefix: str = None,
         sublevel: str = "base",
         *args,
-        **kwargs) -> None:
+        **kwargs,
+    ) -> None:
 
         self.base = base
         self.name = name
@@ -166,18 +181,31 @@ class BaseType:
             self.paths: list[str] = list(self.fileStruct.values())
 
         if self.ExprEventsFile is None and not isinstance(self.ExprEventsFile, tuple):
-            self.ExprEventsFile = (self.fileNaming.ExperimentEvents, self.fileGlob.ExperimentEvents)
-        elif isinstance(self.ExprEventsFile, str) and not isinstance(self.ExprEventsFile, tuple):
+            self.ExprEventsFile = (
+                self.fileNaming.ExperimentEvents,
+                self.fileGlob.ExperimentEvents,
+            )
+        elif isinstance(self.ExprEventsFile, str) and not isinstance(
+            self.ExprEventsFile, tuple
+        ):
             if "ExperimentEvents" in self.fileGlob:
-                self.ExprEventsFile = (self.ExprEventsFile, self.fileGlob.ExperimentEvents)
+                self.ExprEventsFile = (
+                    self.ExprEventsFile,
+                    self.fileGlob.ExperimentEvents,
+                )
             elif is_valid_filename(self.ExprEventsFile):
                 self.ExprEventsFile = (self.ExprEventsFile, False)
             else:
                 self.ExprEventsFile = (self.ExprEventsFile, True)
 
         if self.ExprSetupFile is None and not isinstance(self.ExprSetupFile, tuple):
-            self.ExprSetupFile = (self.fileNaming.ExperimentSetup, self.fileGlob.ExperimentSetup)
-        elif isinstance(self.ExprSetupFile, str) and not isinstance(self.ExprSetupFile, tuple):
+            self.ExprSetupFile = (
+                self.fileNaming.ExperimentSetup,
+                self.fileGlob.ExperimentSetup,
+            )
+        elif isinstance(self.ExprSetupFile, str) and not isinstance(
+            self.ExprSetupFile, tuple
+        ):
             if "ExperimentSetup" in self.fileGlob:
                 self.ExprSetupFile = (self.ExprSetupFile, self.fileGlob.ExperimentSetup)
             elif is_valid_filename(self.ExprSetupFile):
@@ -209,10 +237,12 @@ class BaseType:
         self._init_data()
 
     def _init_config(self, *args, **kwargs) -> ConfigurationSet:
-        configuration = set_config( *args, **kwargs)
+        configuration = set_config(*args, **kwargs)
         return configuration
 
-    def _init_file_structure(self, base: str = None, prefix: str = None) -> dict[str, any]:
+    def _init_file_structure(
+        self, base: str = None, prefix: str = None
+    ) -> dict[str, any]:
         iterator = {}
         subdirs = os.listdir(base)
         subdirs = [
@@ -233,8 +263,12 @@ class BaseType:
     def _init_data(self) -> dict[str, DataClassProtocol]:
         data = {"test": DataClassProtocol()}
         self.data: dict[str, DataClassProtocol] = data
-        self.all_data = pd.concat([data.all_data for data in self.data.values()], keys=self.data.keys())
-        self.all_scores = pd.concat([data.all_scores for data in self.data.values()], keys=self.data.keys())
+        self.all_data = pd.concat(
+            [data.all_data for data in self.data.values()], keys=self.data.keys()
+        )
+        self.all_scores = pd.concat(
+            [data.all_scores for data in self.data.values()], keys=self.data.keys()
+        )
         self.numeric_columns = self.data[self.names[0]].numeric_columns
 
     def _rename_index(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -266,13 +300,21 @@ class BaseType:
                 self.custom_columns = columns
                 data.buildColumns(self.custom_columns)
         else:
-            logging.debug(f"{self.tabs}{[(col, val) for col, val in zip(columns, values)]}")
-            self.custom_columns = [CustomColumn(col, val) for col, val in zip(columns, values)]
+            logging.debug(
+                f"{self.tabs}{[(col, val) for col, val in zip(columns, values)]}"
+            )
+            self.custom_columns = [
+                CustomColumn(col, val) for col, val in zip(columns, values)
+            ]
             for data in self.data.values():
                 data.buildColumns(self.custom_columns)
         self.custom_columns = self.data[self.names[0]].custom_columns
-        self.all_data = pd.concat([data.all_data for data in self.data.values()], keys=self.names)
-        self.all_scores = pd.concat([data.all_scores for data in self.data.values()], keys=self.names)
+        self.all_data = pd.concat(
+            [data.all_data for data in self.data.values()], keys=self.names
+        )
+        self.all_scores = pd.concat(
+            [data.all_scores for data in self.data.values()], keys=self.names
+        )
 
     def buildTrials(
         self,
@@ -306,17 +348,30 @@ class BaseType:
             end_buffer = self.config["TrialEvents"]["end_buffer"]
         if len(TrackedData) != len(Reduced):
             raise ValueError("TrackedData and Reduced must be the same length")
-        if TrackedData is None or Reduced is None or start_buffer is None or end_buffer is None:
-            raise ValueError("TrackedData, Reduced, start_buffer, and end_buffer must all be specified either directly or in the config file")
+        if (
+            TrackedData is None
+            or Reduced is None
+            or start_buffer is None
+            or end_buffer is None
+        ):
+            raise ValueError(
+                "TrackedData, Reduced, start_buffer, and end_buffer must all be specified either directly or in the config file"
+            )
 
         print(self.tabs, "Building trials for:", self.name)
 
         for data in self.data.values():
             data.buildTrials(TrackedData, Reduced, start_buffer, end_buffer)
-        self.all_trials = [trial for data in self.data.values() for trial in data.all_trials]
-        self.all_data = pd.concat([data.all_data for data in self.data.values()], keys=self.names)
+        self.all_trials = [
+            trial for data in self.data.values() for trial in data.all_trials
+        ]
+        self.all_data = pd.concat(
+            [data.all_data for data in self.data.values()], keys=self.names
+        )
         self.all_data = self._rename_index(self.all_data)
-        self.all_scores = pd.concat([data.all_scores for data in self.data.values()], keys=self.names)
+        self.all_scores = pd.concat(
+            [data.all_scores for data in self.data.values()], keys=self.names
+        )
 
     def meanCenter(self, alldata: bool = False):
         """Recursively mean centers the data for each trial for each experiment
@@ -331,12 +386,10 @@ class BaseType:
                 data.meanCenter()
             self.all_data = mean_center(
                 pd.concat(
-                    [
-                        data.all_data for data in self.data.values()
-                    ],
-                    keys=self.names
+                    [data.all_data for data in self.data.values()], keys=self.names
                 ),
-                self.numeric_columns)
+                self.numeric_columns,
+            )
             self.all_data = self._rename_index(self.all_data)
 
     def zScore(self, alldata: bool = False):
@@ -352,12 +405,10 @@ class BaseType:
                 data.zScore()
             self.all_data = z_score(
                 pd.concat(
-                    [
-                        data.all_data for data in self.data.values()
-                    ],
-                    keys=self.names
+                    [data.all_data for data in self.data.values()], keys=self.names
                 ),
-                self.numeric_columns)
+                self.numeric_columns,
+            )
             self.all_data = self._rename_index(self.all_data)
 
     def normalize(self):
@@ -367,21 +418,21 @@ class BaseType:
             all_data (pd.DataFrame): the normaized data for all experiments concatenated together
         """
 
-        logging.info(f"{self.tabs}Normalizing project {self.name if self.name is not None else ''}")
+        logging.info(
+            f"{self.tabs}Normalizing project {self.name if self.name is not None else ''}"
+        )
 
         for data in self.data.values():
-                data.normalize()
+            data.normalize()
         self.all_data = z_score(
-                pd.concat(
-                    [
-                        data.all_data for data in self.data.values()
-                    ],
-                    keys=self.names
-                ),
-                self.numeric_columns)
+            pd.concat([data.all_data for data in self.data.values()], keys=self.names),
+            self.numeric_columns,
+        )
         self.all_data = self._rename_index(self.all_data)
 
-    def runPCA(self, data: pd.DataFrame = None, numeric_columns: list[str] | pd.Index = None):
+    def runPCA(
+        self, data: pd.DataFrame = None, numeric_columns: list[str] | pd.Index = None
+    ):
         """Reduces `all_data` to 2 and 3 dimensions using PCA
 
         Initializes attributes:
@@ -394,7 +445,16 @@ class BaseType:
         else:
             self.pcas = objdict(pca(self.all_data, self.numeric_columns))
 
-    def visualize(self, dimensions: int, normalized: bool = False, color_column: str = "Trial", lines: bool = False, filename: str = None, *args, **kwargs) -> go.Figure:
+    def visualize(
+        self,
+        dimensions: int,
+        normalized: bool = False,
+        color_column: str = "Trial",
+        lines: bool = False,
+        filename: str = None,
+        *args,
+        **kwargs,
+    ) -> go.Figure:
         """Plots the trajectories from the PCA
 
         Args:
@@ -403,36 +463,62 @@ class BaseType:
         if normalized:
             self.runPCA()
         elif not normalized:
-            df: pd.DataFrame = pd.concat(self.all_trials, keys=range(len(self.all_trials)))
+            df: pd.DataFrame = pd.concat(
+                self.all_trials, keys=range(len(self.all_trials))
+            )
             df.index.rename(["Trial", "Trial_index"], inplace=True)
             self.runPCA(df.reset_index(), self.numeric_columns)
 
-        self.pcas[f"pca{dimensions}d"][color_column] = self.pcas[f"pca{dimensions}d"][color_column].astype(str)
+        self.pcas[f"pca{dimensions}d"][color_column] = self.pcas[f"pca{dimensions}d"][
+            color_column
+        ].astype(str)
 
         if dimensions == 2:
             fig = go.Figure(
-                data=[go.Scatter(
-                    x=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 1"],
-                    y=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 2"],
-                    mode = "markers+lines" if lines else "markers",
-					customdata=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color],
-                    marker=dict(size=4)) for color in self.pcas[f"pca{dimensions}d"][color_column].unique()]
+                data=[
+                    go.Scatter(
+                        x=self.pcas[f"pca{dimensions}d"].loc[
+                            self.pcas[f"pca{dimensions}d"][color_column] == color
+                        ]["principal component 1"],
+                        y=self.pcas[f"pca{dimensions}d"].loc[
+                            self.pcas[f"pca{dimensions}d"][color_column] == color
+                        ]["principal component 2"],
+                        mode="markers+lines" if lines else "markers",
+                        customdata=self.pcas[f"pca{dimensions}d"].loc[
+                            self.pcas[f"pca{dimensions}d"][color_column] == color
+                        ],
+                        marker=dict(size=4),
+                    )
+                    for color in self.pcas[f"pca{dimensions}d"][color_column].unique()
+                ]
             )
         elif dimensions == 3:
             fig = go.Figure(
-                data=[go.Scatter3d(
-                    x=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 1"],
-                    y=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 2"],
-                    z=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color]["principal component 3"],
-                    mode = "markers+lines" if lines else "markers",
-                    customdata=self.pcas[f"pca{dimensions}d"].loc[self.pcas[f"pca{dimensions}d"][color_column] == color],
-                    marker=dict(size=4)) for color in self.pcas[f"pca{dimensions}d"][color_column].unique()]
+                data=[
+                    go.Scatter3d(
+                        x=self.pcas[f"pca{dimensions}d"].loc[
+                            self.pcas[f"pca{dimensions}d"][color_column] == color
+                        ]["principal component 1"],
+                        y=self.pcas[f"pca{dimensions}d"].loc[
+                            self.pcas[f"pca{dimensions}d"][color_column] == color
+                        ]["principal component 2"],
+                        z=self.pcas[f"pca{dimensions}d"].loc[
+                            self.pcas[f"pca{dimensions}d"][color_column] == color
+                        ]["principal component 3"],
+                        mode="markers+lines" if lines else "markers",
+                        customdata=self.pcas[f"pca{dimensions}d"].loc[
+                            self.pcas[f"pca{dimensions}d"][color_column] == color
+                        ],
+                        marker=dict(size=4),
+                    )
+                    for color in self.pcas[f"pca{dimensions}d"][color_column].unique()
+                ]
             )
         else:
             raise ValueError("dimensions must be 2 or 3")
 
         if filename is not None:
-            if filename.lower().endswith('.html'):
+            if filename.lower().endswith(".html"):
                 fig.write_html(filename, *args, **kwargs)
             else:
                 fig.write_image(filename, *args, **kwargs)
@@ -524,5 +610,5 @@ class BaseType:
         """
         return (self.quant_cols, self.qual_cols)
 
-	def current_config(self) -> None:
-		print(self.config)
+    def current_config(self) -> None:
+        print(self.config)

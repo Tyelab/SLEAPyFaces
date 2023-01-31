@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import glob
+import os
 from dataclasses import dataclass
 from os import PathLike
-import os
-import glob
+
 import pandas as pd
 
 
-@dataclass(slots=True)
+@dataclass
 class File:
     """A structured file object that contains the base path and filename of a file.
 
@@ -31,8 +32,11 @@ class File:
         self.filename = filename
         self.get_glob = get_glob
 
-        self.file = glob.glob(os.path.join(self.basepath, self.filename)
-                              ) if self.get_glob else os.path.join(self.basepath, self.filename)
+        self.file = (
+            glob.glob(os.path.join(self.basepath, self.filename))
+            if self.get_glob
+            else os.path.join(self.basepath, self.filename)
+        )
         self.file = self.file[0] if type(self.file) is list else self.file
 
     def iPath(self, i: int) -> str:
@@ -40,7 +44,7 @@ class File:
         return "/".join(self.file.split("/")[:-i])
 
 
-@dataclass(slots=True)
+@dataclass
 class FileConstructor:
 
     """Takes in the base paths and filenames of the experimental data and returns them as a structured object.
@@ -64,7 +68,11 @@ class FileConstructor:
     video: File
 
     def __init__(
-        self, ExperimentEventsFile: File, SLEAPFile: File, ExperimentSetupFile: File, VideoFile: File
+        self,
+        ExperimentEventsFile: File,
+        SLEAPFile: File,
+        ExperimentSetupFile: File,
+        VideoFile: File,
     ) -> None:
         self.events = ExperimentEventsFile
         self.sleap = SLEAPFile
@@ -72,7 +80,7 @@ class FileConstructor:
         self.video = VideoFile
 
 
-@dataclass(slots=True)
+@dataclass
 class CustomColumn:
     """Builds an annotation column for the base dataframe.
 
