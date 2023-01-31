@@ -581,6 +581,10 @@ class BaseType:
                 store.put("all_data", self.all_data)
                 store.put("all_scores", self.all_scores)
 
+
+    def current_config(self) -> None:
+        print(self.config)
+
     @property
     def quant_cols(self) -> list[str]:
         """Returns the quantitative columns of the data.
@@ -609,6 +613,3 @@ class BaseType:
             tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
         """
         return (self.quant_cols, self.qual_cols)
-
-    def current_config(self) -> None:
-        print(self.config)
