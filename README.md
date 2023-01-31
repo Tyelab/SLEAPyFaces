@@ -158,6 +158,8 @@ If you use SLEAPyFaces in your research, this does not fall under *standard soft
 
 ### Installation
 
+Note: this installation is not compatible with Windows systems at present.  Currently we have tested this on MacOS Ventura 13.1 and on a Linux server running Debian Buster v10.x.
+
 #### Using pip:
 
 ```console
