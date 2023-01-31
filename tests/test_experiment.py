@@ -1,6 +1,6 @@
 from sleapyfaces.experiment import Experiment
 from sleapyfaces.utils.structs import File, FileConstructor, CustomColumn
-from sleapyfaces.io import SLEAPanalysis
+from sleapyfaces.files import SLEAPanalysis
 import pandas as pd
 
 

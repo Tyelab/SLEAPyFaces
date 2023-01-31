@@ -77,7 +77,7 @@ class FeatureExtractor:
         qual_data: pd.DataFrame = all_data.loc[:, self.classes]
         qual_data: pd.DataFrame = qual_data.loc[:,~qual_data.columns.duplicated()].copy()
         qual_data.columns = pd.MultiIndex.from_product([["Classes"], self.classes])
-        self.qual_cols: list[str] = qual_data.columns
+        self.qual_cols: list[str] = qual_data.columns.to_list()
         self.data = pd.concat([qual_data, num_data], axis=1)
 
         self.cartesian.reset_index(inplace=True)
@@ -341,7 +341,7 @@ class FeatureExtractor:
 
     @property
     def quant_cols(self) -> list[str]:
-        return [col for col in self._all_data.columns if col not in self.qual_cols]
+        return [col for col in self._all_data.columns.to_list() if col not in self.qual_cols]
 
     @property
     def cols(self) -> tuple[list[str], list[str]]:

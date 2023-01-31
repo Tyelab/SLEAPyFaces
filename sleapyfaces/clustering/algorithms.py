@@ -1,5 +1,6 @@
 from math import sqrt
 from typing import Protocol
+import logging
 
 import numpy as np
 import pandas as pd
@@ -19,16 +20,23 @@ class Cluster:
         prediction_column (str): the prediction class (from FeatureExtractor.classes)
         pipeline (bool, optional): whether to use a sklearn pipeline. Defaults to False.
     """
-    def __init__(self, data: dataobjectprotocol, prediction_column: str):
+    def __init__(self, data: dataobjectprotocol, prediction_column: str, parallel_processing: bool = True, *args, **kwargs):
         from sklearn.model_selection import train_test_split
-        from sklearn.preprocessing import MinMaxScaler
+        from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
-        self.cluster_data = pd.DataFrame()
+        self.clusters = pd.DataFrame()
+        self.silhouette = pd.DataFrame()
         self._all_data = data.all_data
         self.qual_cols, self.quant_cols = data.cols
 
         self.pred = prediction_column
-        self.predData = self._all_data.loc[:, ("Classes", self.pred)]
+        self.predData: pd.Series = self._all_data.loc[:, ("Classes", self.pred)]
+        if np.can_cast(self.predData.dtype, np.number):
+            self.predData = self.predData.astype(np.number)
+        else:
+            self.predData = LabelEncoder().fit_transform(self.predData)
+            self._all_data = self._all_data.join(pd.DataFrame(self.predData, columns=pd.MultiIndex.from_product([["Classes"], [f"{self.pred}_encoded"]])))
+            self.qual_cols.append(("Classes", f"{self.pred}_encoded"))
 
         self.clusterData = self._all_data.loc[:, self.quant_cols]
         self.clusterData = MinMaxScaler().fit_transform(self.clusterData)
@@ -37,10 +45,33 @@ class Cluster:
             self.clusterData, self._all_data.loc[:, ("Classes", self.pred)], test_size=0.3, random_state=12345
         )
 
+        self.parallel = None
+        if parallel_processing:
+            from joblib import Parallel
+            self.parallel = Parallel(n_jobs=-1, verbose=1, prefer="processes", max_nbytes='5M' if "max_nbytes" not in kwargs else kwargs["max_nbytes"])
 
-    def kmeans(self, output: bool = False, gridSearch: bool = False, *args, **kwargs):
-        from sklearn.cluster import KMeans
+    def _score(self, model, X, y, z, cross_validate: bool = False):
         from sklearn.metrics import silhouette_score
+        from sklearn.model_selection import cross_validate, cross_val_score
+        if cross_validate:
+            if self.parallel is not None:
+                with self.parallel:
+                    scores = cross_validate(model, X, y, cv=5, n_jobs=-1, verbose=4)
+            else:
+                scores = cross_validate(model, X, y, cv=5, n_jobs=-1, verbose=4)
+        else:
+            if self.parallel is not None:
+                with self.parallel:
+                    scores = cross_val_score(model, X, y, cv=5, n_jobs=-1, verbose=4)
+            else:
+                scores = cross_val_score(model, X, y, cv=5, n_jobs=-1, verbose=4)
+        logging.info(f'Cross Validation Scores: {scores}')
+        score = silhouette_score(X, z)
+        logging.info(f'Silhouette Score: {score}')
+        return scores, score
+
+    def kmeans(self, output: bool = False, gridSearch: bool = False, cross_validate: bool = False, *args, **kwargs):
+        from sklearn.cluster import KMeans
 
         print("\t KMeans Clustering...")
         if "n_clusters" in kwargs or len(args) != 0:
@@ -51,23 +82,54 @@ class Cluster:
         else:
             n_clusters = 8
 
+        if cross_validate or gridSearch:
+            X_train = self.clusterData
+            y_train = self.predData
+            X_test = self.clusterData
+            y_test = self.predData
+            cross_validate = False if gridSearch else True
+        else:
+            X_train = self.trainData
+            y_train = self.trainLabels
+            X_test = self.testData
+            y_test = self.testLabels
+
         kmeans = KMeans( *args, **kwargs)
         if gridSearch:
             from sklearn.model_selection import GridSearchCV
-            params = dict(**self.params, **{
-                'kmeans__n_clusters': range(2, 20),
-                'kmeans__init': ['k-means++', 'random'],
-                'kmeans__n_init': [10, 20, 30],
-                'kmeans__max_iter': [300, 500, 1000],
-                'kmeans__tol': [1e-4, 1e-3, 1e-2],
-                'kmeans__random_state': [12345],
-            })
-            kmeans = GridSearchCV(kmeans, params, cv=5, n_jobs=-1, verbose=1)
-        kmeans.fit(self.clusterData)
-        labels = kmeans.predict(self.clusterData)
-        print(f'Silhouette Score(n={n_clusters}): {silhouette_score(self.clusterData, labels)}')
+
+            params = {
+                'n_clusters': range(2, 20),
+                'init': ['k-means++', 'random'],
+                'n_init': [10, 20, 30],
+                'max_iter': [300, 500, 1000],
+                'tol': [1e-4, 1e-3, 1e-2],
+                'random_state': [12345],
+            }
+            if self.parallel is not None:
+                with self.parallel:
+                    kmeans = GridSearchCV(kmeans, params, cv=5, n_jobs=-1, verbose=4)
+                    kmeans.fit(X_train, y_train)
+            else:
+                kmeans = GridSearchCV(kmeans, params, cv=5, n_jobs=-1, verbose=4)
+                kmeans.fit(X_train, y_train)
+        if cross_validate or gridSearch:
+            X_train = self.clusterData
+            y_train = self.predData
+            X_test = self.clusterData
+            y_test = self.predData
+            cross_validate = False if gridSearch else True
+        else:
+            X_train = self.trainData
+            y_train = self.trainLabels
+            X_test = self.testData
+            y_test = self.testLabels
+
+        labels = kmeans.predict(X_test)
+        scores, score = self._score(kmeans, X_test, y_test, labels, cross_validate)
         clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["KMeans"]]))
-        self.cluster_data = pd.concat([self.cluster_data, clusters.T], axis=1)
+        self.clusters = pd.concat([self.clusters, clusters.T], axis=1)
+        self.silhouette = pd.concat([self.silhouette, pd.DataFrame([score, scores.values()], columns=["KMeans"])], axis=1)
         if output:
             return kmeans
 
@@ -97,7 +159,7 @@ class Cluster:
         labels = ap.predict(self.clusterData)
         print(f'Silhouette Score(n={n_clusters}): {silhouette_score(self.clusterData, labels)}')
         clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["AffinityPropagation"]]))
-        self.data = pd.concat([self.data, clusters.T], axis=1)
+        self.clusters = pd.concat([self.clusters, clusters.T], axis=1)
         if output:
             return ap
 
@@ -123,7 +185,7 @@ class Cluster:
             labels = hc.predict(self.clusterData)
         print(f'Silhouette Score(n={n_clusters}): {silhouette_score(self.clusterData, labels)}')
         clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["HeirarchicalAgglomerative"]]))
-        self.data = pd.concat([self.data, clusters.T], axis=1)
+        self.clusters = pd.concat([self.clusters, clusters.T], axis=1)
         if output:
             return hc
 
@@ -152,7 +214,7 @@ class Cluster:
             labels = dbscan.predict(self.clusterData)
         print(f'Silhouette Score(eps={eps}): {silhouette_score(self.clusterData, labels)}')
         clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["Density-Based"]]))
-        self.data = pd.concat([self.data, clusters.T], axis=1)
+        self.clusters = pd.concat([self.clusters, clusters.T], axis=1)
         if output:
             return dbscan
 
@@ -176,7 +238,7 @@ class Cluster:
         labels: np.ndarray[any, np.intp] = bir.predict(self.clusterData)
         print(f'Silhouette Score(n={n_clusters}): {silhouette_score(self.clusterData, labels)}')
         clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["Balanced"]]))
-        self.data = pd.concat([self.data, clusters], axis=1)
+        self.clusters = pd.concat([self.clusters, clusters], axis=1)
         if output:
             return bir
 
@@ -204,7 +266,36 @@ class Cluster:
             labels: np.ndarray[any, np.intp] = svm.fit_predict(self.clusterData)
         print(f'Silhouette Score(n={n_clusters}): {silhouette_score(self.clusterData, labels)}')
         clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["SVM"]]))
-        self.data = pd.concat([self.data, clusters], axis=1)
+        self.clusters = pd.concat([self.clusters, clusters], axis=1)
+
+        if output:
+            return svm
+
+    def SVM(self, output: bool = False, *args, **kwargs):
+        from sklearn.metrics import silhouette_score
+        from sklearn.svm import SVC
+
+        print("\t SVM...")
+        if "n_clusters" in kwargs or len(args) != 0:
+            if "n_clusters" in kwargs:
+                n_clusters = kwargs["n_clusters"]
+            else:
+                n_clusters = args[0]
+        else:
+            n_clusters = 3
+
+        svm = SVC(*args, **kwargs)
+        if self.pipeline is not None:
+            svm = Pipeline([*self.pipeline, ('svm', svm)])
+        svm = svm.fit(self.clusterData, self.clusterLabels)
+        labels = None
+        if isinstance(svm, Pipeline):
+            labels: np.ndarray[any, np.intp] = svm.predict(self.clusterData)
+        elif isinstance(svm, SVC):
+            labels: np.ndarray[any, np.intp] = svm.fit_predict(self.clusterData)
+        print(f'Silhouette Score(n={n_clusters}): {silhouette_score(self.clusterData, labels)}')
+        clusters: pd.DataFrame[np.intp] = pd.DataFrame(labels.T, dtype=np.intp, columns=pd.MultiIndex.from_product([["Clustering"], ["SVM"]]))
+        self.clusters = pd.concat([self.clusters, clusters], axis=1)
 
         if output:
             return svm

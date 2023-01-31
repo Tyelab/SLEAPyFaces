@@ -1,6 +1,3 @@
-name: sleapyfaces
-channels:
-  - conda-forge
 dependencies:
   - _ipython_minor_entry_point
   - aom
@@ -255,4 +252,4 @@ dependencies:
   - zstd
   - pip:
       - progressbar2
-prefix: /opt/homebrew/Caskroom/miniforge/base/envs/sleapyfaces
+      - sleapyfaces

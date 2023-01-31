@@ -4,7 +4,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from sleapyfaces.io import ExprMetadata, EventsData, SLEAPData, VideoMetadata
+from sleapyfaces.files import ExprMetadata, EventsData, SLEAPData, VideoMetadata
 from sleapyfaces.utils import flatten_list, into_trial_format, reduce_daq
 from sleapyfaces.utils.normalize import mean_center, z_score
 from sleapyfaces.utils.structs import CustomColumn, FileConstructor, File
@@ -57,6 +57,7 @@ class Experiment(BaseType):
         )
 
     def _init_data(self):
+        print(self.ExprEventsFile)
         self.files = FileConstructor(
             ExperimentEventsFile=File(self.base, *self.ExprEventsFile),
             ExperimentSetupFile=File(self.base, *self.ExprSetupFile),

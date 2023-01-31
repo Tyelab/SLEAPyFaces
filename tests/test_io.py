@@ -1,4 +1,4 @@
-from sleapyfaces.io import DAQData, SLEAPanalysis, BehMetadata, VideoMetadata
+from sleapyfaces.files import DAQData, SLEAPanalysis, BehMetadata, VideoMetadata
 
 
 def test_daq_initialization():

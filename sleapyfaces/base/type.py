@@ -10,6 +10,7 @@ from pathvalidate._filename import is_valid_filename
 import pandas as pd
 import plotly.graph_objects as go
 import pickle
+from sleapyfaces.config import set_config
 
 class objdict(dict):
     def __init__(self, *args, **kwargs):
@@ -34,51 +35,6 @@ def all_equal(iterable):
     "Returns True if all the elements are equal to each other"
     g = itertools.groupby(iterable)
     return next(g, True) and not next(g, False)
-
-
-default_config = {
-    "Files": {
-        "FileTypes": {
-            "ExperimentEvents": "csv",
-            "sleap": "hdf5",
-            "Video": "mp4",
-            "ExperimentSetup": "json"
-        },
-        "FileNaming": {
-            "ExperimentEvents": "*_events.csv",
-            "sleap": "*.h5",
-            "Video": "*.mp4",
-            "ExperimentSetup": "*.json"
-        },
-        "FileGlob": {
-            "ExperimentEvents": True,
-            "sleap": True,
-            "Video": True,
-            "ExperimentSetup": True
-        }
-    },
-    "Prefixes": {
-        "Project": None,
-        "Experiment": "week",
-    },
-    "TrialEvents": {
-        "TrackedData": ["Speaker_on", "LED590_on"],
-        "Reduced": [False, True],
-        "start_buffer": 10000,
-        "end_buffer": 13000
-    },
-    "ExperimentEvents" : "columns",
-    "SLEAP": "datasets",
-    "Video": "metadata",
-    "ExperimentSetup": {
-        "beh_metadata": ["trialArray", "ITIArray"]
-    },
-    "Logging": {
-        "level": "INFO",
-        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        "filename": None,
-    }
-}
 
 class DataClassProtocol(Protocol):
     base: str
@@ -148,15 +104,17 @@ class BaseType:
     Args:
         name (str): the name of the project/experiment
         base (str): the base directory of the project/experiment
-        file_structure (dict[str, str] | bool): the file structure of the project/experiment
+        file_structure (dict[str, str] | bool): the file structure of the project/experiment. Set to `False` to enable autodetection of subdirectories.
         ExperimentEventsFile (tuple[str, bool] | str): the naming convention for the experimental events files (e.g. ("*_events.csv", True) or ("DAQOutput.csv", False))
         ExperimentSetupFile (tuple[str, bool] | str): the naming convention for the experimental structure files (e.g. ("*_config.json", True) or ("BehMetadata.json", False))
         SLEAPFile (tuple[str, bool] | str): the naming convention for the SLEAP files (e.g. ("*_sleap.h5", True) or ("SLEAP.h5", False))
         VideoFile (tuple[str, bool] | str): the naming convention for the video files (e.g. ("*_video.mp4", True) or ("Video.mp4", False))
-        tabs (str): the tabs to use for logging
-        passed_config (dict[str, any]): the config to use for the project/experiment
         prefix (str): the prefix to use for the project/experiment (e.g. "week") in the dataframes
-        *args, **kwargs: Additional arguments to pass to the _init_config method
+        *args, **kwargs: Configuration args
+
+		Configuration Args:
+			FilePath (str): The full filepath to the configuration file or the relative path to the current working directory without a leading slash
+
 
     """
 
@@ -207,70 +165,51 @@ class BaseType:
             self.names: list[str] = list(self.fileStruct.keys())
             self.paths: list[str] = list(self.fileStruct.values())
 
-        if self.ExprEventsFile is None:
+        if self.ExprEventsFile is None and not isinstance(self.ExprEventsFile, tuple):
             self.ExprEventsFile = (self.fileNaming.ExperimentEvents, self.fileGlob.ExperimentEvents)
-        elif self.ExprEventsFile is str:
-            if is_valid_filename(self.ExprEventsFile):
+        elif isinstance(self.ExprEventsFile, str) and not isinstance(self.ExprEventsFile, tuple):
+            if "ExperimentEvents" in self.fileGlob:
+                self.ExprEventsFile = (self.ExprEventsFile, self.fileGlob.ExperimentEvents)
+            elif is_valid_filename(self.ExprEventsFile):
                 self.ExprEventsFile = (self.ExprEventsFile, False)
             else:
                 self.ExprEventsFile = (self.ExprEventsFile, True)
 
-        if self.ExprSetupFile is None:
+        if self.ExprSetupFile is None and not isinstance(self.ExprSetupFile, tuple):
             self.ExprSetupFile = (self.fileNaming.ExperimentSetup, self.fileGlob.ExperimentSetup)
-        elif self.ExprSetupFile is str:
-            if is_valid_filename(self.ExprSetupFile):
+        elif isinstance(self.ExprSetupFile, str) and not isinstance(self.ExprSetupFile, tuple):
+            if "ExperimentSetup" in self.fileGlob:
+                self.ExprSetupFile = (self.ExprSetupFile, self.fileGlob.ExperimentSetup)
+            elif is_valid_filename(self.ExprSetupFile):
                 self.ExprSetupFile = (self.ExprSetupFile, False)
             else:
                 self.ExprSetupFile = (self.ExprSetupFile, True)
 
-        if self.SLEAPFile is None:
+        if self.SLEAPFile is None and not isinstance(self.SLEAPFile, tuple):
             self.SLEAPFile = (self.fileNaming.sleap, self.fileGlob.sleap)
-        elif self.SLEAPFile is str:
-            if is_valid_filename(self.SLEAPFile):
+        elif isinstance(self.SLEAPFile, str) and not isinstance(self.SLEAPFile, tuple):
+            if "sleap" in self.fileGlob:
+                self.SLEAPFile = (self.SLEAPFile, self.fileGlob.sleap)
+            elif is_valid_filename(self.SLEAPFile):
                 self.SLEAPFile = (self.SLEAPFile, False)
             else:
                 self.SLEAPFile = (self.SLEAPFile, True)
 
-        if self.VideoFile is None:
+        if self.VideoFile is None and not isinstance(self.VideoFile, tuple):
             self.VideoFile = (self.fileNaming.Video, self.fileGlob.Video)
-        elif self.VideoFile is str:
-            if is_valid_filename(self.VideoFile):
+        elif isinstance(self.VideoFile, str):
+            if "Video" in self.fileGlob and not isinstance(self.VideoFile, tuple):
+                self.VideoFile = (self.VideoFile, self.fileGlob.Video)
+            elif is_valid_filename(self.VideoFile):
                 self.VideoFile = (self.VideoFile, False)
             else:
                 self.VideoFile = (self.VideoFile, True)
+
         self.data = {}
         self._init_data()
 
-    def _init_config(self, config_prefix: str = None, config_separator: str = None, config_file: str = None, config_dict: dict = None, interpolate_config: bool = False) -> ConfigurationSet:
-        """Initializes the config file for the project
-
-        Args:
-            config_prefix (str): the prefix for the sleapyfaces config parameters in the environment variables
-            config_separator (str): the separator used to separate the config parameters in the environment variables
-            config_file (str): the path to the config file
-            config_dict (dict): a dictionary of the config file
-            interpolate_config (bool): whether to interpolate the config file
-
-        Returns:
-            configuration (ConfigurationSet): the hierarchical configuration set for the project
-        """
-        configs = []
-        if config_prefix is not None:
-            configs.append(('env', config_prefix, config_separator))
-        if config_file is not None:
-            configs.append(('json', config_file, True))
-            configs.append(('yaml', config_file, True))
-            configs.append(('toml', config_file, True))
-            configs.append(('ini', config_file, True))
-        if config_dict is not None:
-            configs.append(('dict', config_dict))
-        configs.append(('dict', default_config))
-        configuration = config(*configs, interpolate=interpolate_config)
-        logging.basicConfig(
-            filename = configuration["Logging"]["filename"],
-            format=configuration["Logging"]["format"],
-            level=configuration["Logging"]["level"]
-        )
+    def _init_config(self, *args, **kwargs) -> ConfigurationSet:
+        configuration = set_config( *args, **kwargs)
         return configuration
 
     def _init_file_structure(self, base: str = None, prefix: str = None) -> dict[str, any]:
@@ -584,3 +523,6 @@ class BaseType:
             tuple[list[str], list[str]]: a tuple of column lists, the first being the target columns and the second being the non-target columns.
         """
         return (self.quant_cols, self.qual_cols)
+
+	def current_config(self) -> None:
+		print(self.config)
