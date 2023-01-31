@@ -1677,3 +1677,26 @@ Traceback (most recent call last):
   File "/Users/annieehler/.local/share/nvim/mason/packages/pyre/venv/lib/python3.11/site-packages/pyre_check/client/commands/pyre_server_options.py", line 60, in create
     raise configuration_module.InvalidConfiguration(
 pyre_check.client.configuration.exceptions.InvalidConfiguration: Invalid configuration: Cannot locate a Pyre binary to run.
+2023-01-31 13:58:10,306 [PID 37711] DEBUG Using selector: KqueueSelector
+2023-01-31 13:58:10,307 [PID 37711] INFO Reading Pyre server configurations...
+2023-01-31 13:58:10,307 [PID 37711] INFO No binary specified, looking for `pyre.bin` in PATH
+2023-01-31 13:58:10,308 [PID 37711] ERROR Uncaught error in persistent.run
+Traceback (most recent call last):
+  File "/Users/annieehler/.local/share/nvim/mason/packages/pyre/venv/lib/python3.11/site-packages/pyre_check/client/commands/persistent.py", line 502, in run
+    return asyncio.get_event_loop().run_until_complete(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annieehler/.pyenv/versions/3.11.1/lib/python3.11/asyncio/base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/annieehler/.local/share/nvim/mason/packages/pyre/venv/lib/python3.11/site-packages/pyre_check/client/commands/persistent.py", line 436, in run_persistent
+    initial_server_options = launch_and_subscribe_handler.PyreDaemonLaunchAndSubscribeHandler.read_server_options(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annieehler/.local/share/nvim/mason/packages/pyre/venv/lib/python3.11/site-packages/pyre_check/client/commands/launch_and_subscribe_handler.py", line 120, in read_server_options
+    return server_options_reader()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annieehler/.local/share/nvim/mason/packages/pyre/venv/lib/python3.11/site-packages/pyre_check/client/commands/pyre_server_options.py", line 93, in read
+    return PyreServerOptions.create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annieehler/.local/share/nvim/mason/packages/pyre/venv/lib/python3.11/site-packages/pyre_check/client/commands/pyre_server_options.py", line 60, in create
+    raise configuration_module.InvalidConfiguration(
+pyre_check.client.configuration.exceptions.InvalidConfiguration: Invalid configuration: Cannot locate a Pyre binary to run.
