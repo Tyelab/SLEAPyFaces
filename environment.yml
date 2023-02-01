@@ -63,4 +63,5 @@ dependencies:
       - sleapyfaces
       - statsmodels
       - tables
-prefix: /Users/annieehler/.pyenv/versions/mambaforge-22.9.0-3/envs/sleapyfaces
+
+

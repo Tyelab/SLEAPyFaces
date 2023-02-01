@@ -33,6 +33,7 @@ For a single `Experiment` analysis, you will need to have the following files in
 3. An events file (`.csv`), which contains the events data. 
 4. An experiment setup file (`.json`), which contains the experiment setup/metadata. 
 
+
 # %%
 from sleapyfaces.base import Experiment
 
@@ -146,4 +147,5 @@ expr.normalize() # This will normalize the data for each trial.
 expr.visualize(dimensions=3, normalized=True, filename=".ignore/3DExample.html") # This will visualize the data in 3D and output the visualization as an interactive plot. 
 
 # %% [markdown]
+
 
