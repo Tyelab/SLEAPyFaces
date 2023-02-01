@@ -52,7 +52,8 @@ expr = Experiment(
 # %% [markdown]
 For a single `Project` analysis, you will need to have multiple folders containing all the necessary `Experiment` files.
 # %%
-from sleapyfaces.base import Project 
+from sleapyfaces.base import Project
+
 proj = Project(
     ExperimentEventsFile=("*_events.csv", True), # we assign the events file (which is a csv file)
     ExperimentSetupFile=("*.json", True), # we assign the experiment setup file (which is a json file)
@@ -144,4 +145,5 @@ expr.normalize() # This will normalize the data for each trial.
 
 expr.visualize(dimensions=3, normalized=True, filename=".ignore/3DExample.html") # This will visualize the data in 3D and output the visualization as an interactive plot. 
 
+# %% [markdown]
 
