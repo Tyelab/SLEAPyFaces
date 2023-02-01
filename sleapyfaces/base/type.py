@@ -6,7 +6,6 @@ from typing import Protocol
 
 import pandas as pd
 import plotly.graph_objects as go
-from config import config
 from config.configuration_set import ConfigurationSet
 from pathvalidate._filename import is_valid_filename
 
@@ -580,7 +579,6 @@ class BaseType:
             else:
                 store.put("all_data", self.all_data)
                 store.put("all_scores", self.all_scores)
-
 
     def current_config(self) -> None:
         print(self.config)

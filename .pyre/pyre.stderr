@@ -1861,3 +1861,4 @@ Traceback (most recent call last):
   File "/Users/annieehler/.local/share/nvim/mason/packages/pyre/venv/lib/python3.11/site-packages/pyre_check/client/commands/pyre_server_options.py", line 60, in create
     raise configuration_module.InvalidConfiguration(
 pyre_check.client.configuration.exceptions.InvalidConfiguration: Invalid configuration: Cannot locate a Pyre binary to run.
+
