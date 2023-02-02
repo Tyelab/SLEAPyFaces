@@ -66,6 +66,7 @@ class FeatureExtractor:
 
         self.cartesian: pd.DataFrame = dataObject.all_data
         self.cartesianCols, self.classes = dataObject.cols
+        self.classes = [*set(self.classes)]
 
         self.polar: pd.DataFrame = cartesian_to_polar(
             self.cartesian, self.cartesianCols
